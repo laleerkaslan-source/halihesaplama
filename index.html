@@ -119,6 +119,9 @@
       .tab-btn { padding: 12px 14px; font-size: 13px; }
     }
 
+    .goster .result-value { filter: blur(0) !important; }
+    .goster .result-label::after { content: " 👁"; }
+
     @media print {
       body { background: #fff; color: #000; }
       .header, .tabs, .card, .result-box { background: #fff; border-color: #ddd; color: #000; }
@@ -241,13 +244,13 @@
             <div class="result-label">Toplam m²</div>
             <div class="result-value" id="hrTotalM2" style="color:#a78bfa;">-</div>
           </div>
-          <div class="result-item">
-            <div class="result-label">Birim Tutar</div>
-            <div class="result-value" id="hrBirim" style="color:#f59e0b;">-</div>
+          <div class="result-item" onclick="this.classList.toggle('goster')" style="cursor:pointer;">
+            <div class="result-label">Birim Tutar 🔒</div>
+            <div class="result-value" id="hrBirim" style="color:#f59e0b; filter:blur(8px); transition:filter 0.3s;">-</div>
           </div>
-          <div class="result-item">
-            <div class="result-label">Toplam Maliyet</div>
-            <div class="result-value" id="hrTotal" style="color:#22c55e;">-</div>
+          <div class="result-item" onclick="this.classList.toggle('goster')" style="cursor:pointer;">
+            <div class="result-label">Toplam Maliyet 🔒</div>
+            <div class="result-value" id="hrTotal" style="color:#22c55e; filter:blur(8px); transition:filter 0.3s;">-</div>
           </div>
           <div class="result-item" style="border-top: 2px solid #8b5cf6; flex: 1 1 100%; margin-top: 8px; padding-top: 12px;">
             <div class="result-label">Satış Fiyatı (Maliyet ×2 + %10)</div>
