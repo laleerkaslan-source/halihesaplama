@@ -3,15 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Telahome Halı Hesaplama</title>
+  <title>Telahome Halı Yönetim</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { background: #0a0f1e; font-family: 'DM Sans', sans-serif; color: #f1f5f9; min-height: 100vh; }
+    select option { background: #1e293b; color: #f1f5f9; }
 
     .header {
       background: #0f172a; border-bottom: 1px solid #1e293b;
-      padding: 14px 24px; display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 24px; display: flex; justify-content: space-between; align-items: center;
     }
     .header-left { display: flex; align-items: center; gap: 12px; }
     .logo {
@@ -20,98 +21,110 @@
       display: flex; align-items: center; justify-content: center;
       font-size: 16px; font-weight: 900; color: #fff;
     }
-    .header h1 { font-size: 18px; font-weight: 700; color: #f1f5f9; }
-    .header span { color: #94a3b8; font-size: 13px; }
+    .header h1 { font-size: 18px; font-weight: 700; }
 
-    .container { max-width: 900px; margin: 0 auto; padding: 24px 16px; }
+    .tabs {
+      display: flex; gap: 0; background: #0f172a; border-bottom: 1px solid #1e293b;
+      padding: 0 16px; overflow-x: auto;
+    }
+    .tab-btn {
+      padding: 14px 20px; border: none; background: none; color: #64748b;
+      font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit;
+      border-bottom: 3px solid transparent; white-space: nowrap; transition: all 0.2s;
+    }
+    .tab-btn:hover { color: #cbd5e1; }
+    .tab-btn.active { color: #8b5cf6; border-bottom-color: #8b5cf6; }
+
+    .container { max-width: 960px; margin: 0 auto; padding: 24px 16px; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
 
     .card {
       background: #0f172a; border: 1px solid #1e293b; border-radius: 16px;
       padding: 24px; margin-bottom: 20px;
     }
-    .card-title { font-size: 16px; font-weight: 700; color: #f1f5f9; margin-bottom: 16px; }
+    .card-title { font-size: 16px; font-weight: 700; margin-bottom: 16px; }
 
     .form-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 14px;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px;
     }
-
     .label { display: block; color: #94a3b8; font-size: 12px; font-weight: 600; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
-
     .input {
       width: 100%; padding: 10px 14px; border-radius: 10px;
       border: 1px solid #334155; background: #1e293b; color: #f1f5f9;
       font-size: 14px; font-family: inherit; outline: none; transition: border 0.2s;
     }
     .input:focus { border-color: #8b5cf6; }
-
-    select.input option { background: #1e293b; color: #f1f5f9; }
-
     .textarea {
       width: 100%; padding: 10px 14px; border-radius: 10px;
       border: 1px solid #334155; background: #1e293b; color: #f1f5f9;
-      font-size: 14px; font-family: inherit; outline: none; resize: vertical; min-height: 60px;
+      font-size: 14px; font-family: inherit; outline: none; resize: vertical; min-height: 50px;
     }
-    .textarea:focus { border-color: #8b5cf6; }
+
+    .btn {
+      padding: 10px 20px; border-radius: 10px; border: none; cursor: pointer;
+      font-size: 14px; font-weight: 700; color: #fff; font-family: inherit; transition: opacity 0.2s;
+    }
+    .btn:hover { opacity: 0.9; }
+    .btn-primary { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
+    .btn-success { background: linear-gradient(135deg, #22c55e, #16a34a); }
+    .btn-ghost { background: #1e293b; color: #94a3b8; }
+    .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 8px; font-weight: 600; }
+    .btn-danger { background: #450a0a; color: #fca5a5; }
+    .btn-edit { background: #1e3a5f; color: #60a5fa; }
 
     .result-box {
       margin-top: 16px; padding: 20px; border-radius: 12px;
       background: linear-gradient(135deg, #1e1040, #0f172a);
-      border: 1px solid #4f46e5;
-      display: flex; flex-wrap: wrap; gap: 0;
+      border: 1px solid #4f46e5; display: flex; flex-wrap: wrap;
     }
-    .result-item {
-      flex: 1 1 120px; padding: 8px 16px; border-right: 1px solid #334155; min-width: 100px;
-    }
+    .result-item { flex: 1 1 120px; padding: 8px 16px; border-right: 1px solid #334155; min-width: 100px; }
     .result-item:last-child { border-right: none; }
     .result-label { color: #94a3b8; font-size: 11px; margin-bottom: 4px; text-transform: uppercase; }
     .result-value { font-weight: 700; font-size: 18px; }
-
-    .btn-primary {
-      padding: 12px 24px; border-radius: 10px; border: none; cursor: pointer;
-      font-size: 14px; font-weight: 700; color: #fff;
-      background: linear-gradient(135deg, #8b5cf6, #6d28d9);
-      font-family: inherit; transition: opacity 0.2s;
-    }
-    .btn-primary:hover { opacity: 0.9; }
-
-    .btn-danger {
-      padding: 6px 12px; border-radius: 8px; border: none; cursor: pointer;
-      font-size: 12px; font-weight: 600; color: #fca5a5; background: #450a0a;
-    }
-    .btn-print {
-      padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer;
-      font-size: 13px; font-weight: 600; color: #fff; background: #16a34a;
-      font-family: inherit;
-    }
 
     table { width: 100%; border-collapse: collapse; }
     th { text-align: left; color: #94a3b8; font-size: 11px; font-weight: 600; text-transform: uppercase; padding: 10px 12px; border-bottom: 1px solid #1e293b; }
     td { padding: 12px; border-bottom: 1px solid #1e293b; font-size: 13px; color: #cbd5e1; }
     tr:hover { background: #1e293b33; }
 
-    .badge {
-      display: inline-block; padding: 3px 10px; border-radius: 6px;
-      font-size: 11px; font-weight: 600;
-    }
-    .badge-kesim { background: #1e3a5f; color: #60a5fa; }
-    .badge-serme { background: #14532d; color: #4ade80; }
-    .badge-diger { background: #3f3f46; color: #a1a1aa; }
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+    .badge-bekliyor { background: #422006; color: #fbbf24; }
+    .badge-teslim { background: #14532d; color: #4ade80; }
+    .badge-iptal { background: #450a0a; color: #fca5a5; }
 
-    @media print {
-      body { background: #fff; color: #000; }
-      .header, .card, .result-box { background: #fff; border-color: #ddd; color: #000; }
-      .no-print { display: none !important; }
-      .result-label, .label, th { color: #555; }
-      .result-value, td { color: #000; }
-      .badge-kesim, .badge-serme, .badge-diger { background: #eee; color: #333; }
+    .stock-badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+    .stock-ok { background: #14532d; color: #4ade80; }
+    .stock-low { background: #422006; color: #fbbf24; }
+    .stock-out { background: #450a0a; color: #fca5a5; }
+
+    .search-box { position: relative; }
+    .search-list {
+      position: absolute; top: 100%; left: 0; right: 0; z-index: 999;
+      background: #1e293b; border: 1px solid #334155; border-radius: 8px;
+      max-height: 200px; overflow-y: auto; margin-top: 4px;
     }
+    .search-item {
+      padding: 10px 14px; cursor: pointer; border-bottom: 1px solid #334155;
+      font-size: 14px; color: #f1f5f9; transition: background 0.1s;
+    }
+    .search-item:hover { background: #0f172a; }
+    .search-item-sub { font-size: 11px; color: #64748b; margin-top: 2px; }
 
     @media (max-width: 600px) {
       .form-grid { grid-template-columns: 1fr; }
       .result-item { flex: 1 1 100%; border-right: none; border-bottom: 1px solid #334155; padding: 6px 12px; }
       .result-item:last-child { border-bottom: none; }
       td, th { padding: 8px 6px; font-size: 12px; }
+      .tab-btn { padding: 12px 14px; font-size: 13px; }
+    }
+
+    @media print {
+      body { background: #fff; color: #000; }
+      .header, .tabs, .card, .result-box { background: #fff; border-color: #ddd; color: #000; }
+      .no-print { display: none !important; }
+      th, .label, .result-label { color: #555; }
+      td, .result-value { color: #000; }
     }
   </style>
 </head>
@@ -120,269 +133,569 @@
   <div class="header">
     <div class="header-left">
       <div class="logo">TH</div>
-      <div>
-        <h1>Halı Hesaplama</h1>
-        <span>Telahome</span>
-      </div>
+      <div><h1>Halı Yönetim</h1></div>
     </div>
   </div>
 
-  <div class="container" id="app">
+  <div class="tabs no-print">
+    <button class="tab-btn active" onclick="switchTab(0)">📦 Halı Stok</button>
+    <button class="tab-btn" onclick="switchTab(1)">📐 Fiyat Hesaplama</button>
+    <button class="tab-btn" onclick="switchTab(2)">📋 Siparişler</button>
+  </div>
 
-    <!-- HESAPLAMA FORMU -->
-    <div class="card no-print">
-      <h3 class="card-title">📐 Yeni Hesaplama</h3>
+  <div class="container">
 
-      <div class="form-grid">
-        <div>
-          <label class="label">Müşteri Adı</label>
-          <input class="input" id="musteriAdi" placeholder="Müşteri adı" />
+    <!-- ═══════════ TAB 0: HALI STOK ═══════════ -->
+    <div class="tab-content active" id="tab0">
+      <div class="card no-print">
+        <h3 class="card-title">📦 Yeni Halı Modeli Ekle</h3>
+        <div class="form-grid">
+          <div>
+            <label class="label">Model Adı</label>
+            <input class="input" id="stokModel" placeholder="örn: Klasik Bordo" />
+          </div>
+          <div>
+            <label class="label">Kategori</label>
+            <select class="input" id="stokKategori">
+              <option value="Halı">Halı</option>
+              <option value="Yolluk">Yolluk</option>
+              <option value="Paspas">Paspas</option>
+              <option value="Kilim">Kilim</option>
+              <option value="Diğer">Diğer</option>
+            </select>
+          </div>
+          <div>
+            <label class="label">m² Fiyatı (₺)</label>
+            <input class="input" type="number" step="0.01" id="stokM2Fiyat" placeholder="örn: 350" />
+          </div>
+          <div>
+            <label class="label">Stok (m²)</label>
+            <input class="input" type="number" step="0.01" id="stokMiktar" placeholder="örn: 50" />
+          </div>
+          <div>
+            <label class="label">En (metre)</label>
+            <input class="input" type="number" step="0.01" id="stokEn" placeholder="örn: 2.00" />
+          </div>
+          <div>
+            <label class="label">Not</label>
+            <input class="input" id="stokNot" placeholder="Renk, desen vb." />
+          </div>
         </div>
-        <div>
-          <label class="label">Telefon</label>
-          <input class="input" id="telefon" placeholder="05xx xxx xx xx" />
-        </div>
-        <div>
-          <label class="label">Tarih</label>
-          <input class="input" type="date" id="tarih" />
-        </div>
-        <div>
-          <label class="label">İşlem Türü</label>
-          <select class="input" id="islemTuru">
-            <option value="kesim">Kesim</option>
-            <option value="serme">Serme</option>
-            <option value="diger">Diğer</option>
-          </select>
-        </div>
+        <button class="btn btn-primary" style="margin-top: 14px;" onclick="stokEkle()">✅ Modeli Ekle</button>
       </div>
 
-      <div class="form-grid" style="margin-top: 14px;">
-        <div>
-          <label class="label">En (metre)</label>
-          <input class="input" type="number" step="0.01" id="en" placeholder="örn: 3.50" oninput="hesapla()" />
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+          <h3 class="card-title" style="margin-bottom: 0;">Halı Modelleri</h3>
+          <input class="input no-print" id="stokArama" placeholder="🔍 Model ara..." style="max-width: 200px;" oninput="stokListele()" />
         </div>
-        <div>
-          <label class="label">Boy (metre)</label>
-          <input class="input" type="number" step="0.01" id="boy" placeholder="örn: 4.20" oninput="hesapla()" />
+        <div style="overflow-x: auto;">
+          <table>
+            <thead><tr>
+              <th>Model</th><th>Kategori</th><th>m² Fiyat</th><th>En</th><th>Stok (m²)</th><th>Not</th><th class="no-print"></th>
+            </tr></thead>
+            <tbody id="stokBody"><tr><td colspan="7" style="text-align:center;color:#64748b;">Henüz model eklenmedi</td></tr></tbody>
+          </table>
         </div>
-        <div>
-          <label class="label">m² Fiyatı (₺)</label>
-          <input class="input" type="number" step="0.01" id="m2fiyat" placeholder="örn: 250" oninput="hesapla()" />
-        </div>
-        <div>
-          <label class="label">Adet</label>
-          <input class="input" type="number" id="adet" value="1" min="1" oninput="hesapla()" />
-        </div>
-      </div>
-
-      <div>
-        <label class="label" style="margin-top: 14px;">Not</label>
-        <textarea class="textarea" id="not" placeholder="Ek bilgi (renk, desen, adres vb.)"></textarea>
-      </div>
-
-      <!-- CANLI HESAPLAMA -->
-      <div class="result-box" id="resultBox" style="display: none;">
-        <div class="result-item">
-          <div class="result-label">Metrekare</div>
-          <div class="result-value" id="resM2" style="color: #8b5cf6;">-</div>
-        </div>
-        <div class="result-item">
-          <div class="result-label">Toplam m²</div>
-          <div class="result-value" id="resTotalM2" style="color: #60a5fa;">-</div>
-        </div>
-        <div class="result-item">
-          <div class="result-label">Birim Tutar</div>
-          <div class="result-value" id="resBirim" style="color: #f59e0b;">-</div>
-        </div>
-        <div class="result-item">
-          <div class="result-label">Toplam Tutar</div>
-          <div class="result-value" id="resTotal" style="color: #22c55e;">-</div>
-        </div>
-      </div>
-
-      <div style="margin-top: 16px; display: flex; gap: 10px;">
-        <button class="btn-primary" onclick="kaydet()">✅ Kaydet</button>
-        <button class="btn-primary" style="background: linear-gradient(135deg, #334155, #1e293b);" onclick="temizle()">🗑️ Temizle</button>
       </div>
     </div>
 
-    <!-- GEÇMİŞ HESAPLAMALAR -->
-    <div class="card">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
-        <h3 class="card-title" style="margin-bottom: 0;">📋 Hesaplama Geçmişi</h3>
-        <div class="no-print" style="display: flex; gap: 8px; align-items: center;">
-          <input class="input" id="aramaInput" placeholder="🔍 Müşteri ara..." style="max-width: 200px;" oninput="listele()" />
-          <button class="btn-print no-print" onclick="window.print()">🖨️ Yazdır</button>
+    <!-- ═══════════ TAB 1: FİYAT HESAPLAMA ═══════════ -->
+    <div class="tab-content" id="tab1">
+      <div class="card">
+        <h3 class="card-title">📐 Halı Fiyat Hesaplama</h3>
+        <div class="form-grid">
+          <div class="search-box" style="grid-column: 1 / -1;">
+            <label class="label">Halı Modeli</label>
+            <input class="input" id="hesapModel" placeholder="🔍 Model ara..." oninput="hesapModelAra()" onfocus="hesapModelAra()" />
+            <div class="search-list" id="hesapModelList" style="display:none;"></div>
+          </div>
+          <div>
+            <label class="label">m² Fiyatı (₺)</label>
+            <input class="input" type="number" id="hesapM2Fiyat" readonly style="background:#0f172a; color:#8b5cf6; font-weight:700;" />
+          </div>
+          <div>
+            <label class="label">En (metre)</label>
+            <input class="input" type="number" step="0.01" id="hesapEn" placeholder="örn: 3.00" oninput="hesapYap()" />
+          </div>
+          <div>
+            <label class="label">Boy (metre)</label>
+            <input class="input" type="number" step="0.01" id="hesapBoy" placeholder="örn: 4.50" oninput="hesapYap()" />
+          </div>
+          <div>
+            <label class="label">Adet</label>
+            <input class="input" type="number" id="hesapAdet" value="1" min="1" oninput="hesapYap()" />
+          </div>
+        </div>
+
+        <div class="result-box" id="hesapResult" style="display:none;">
+          <div class="result-item">
+            <div class="result-label">Model</div>
+            <div class="result-value" id="hrModel" style="color:#8b5cf6; font-size:15px;">-</div>
+          </div>
+          <div class="result-item">
+            <div class="result-label">Metrekare</div>
+            <div class="result-value" id="hrM2" style="color:#60a5fa;">-</div>
+          </div>
+          <div class="result-item">
+            <div class="result-label">Toplam m²</div>
+            <div class="result-value" id="hrTotalM2" style="color:#a78bfa;">-</div>
+          </div>
+          <div class="result-item">
+            <div class="result-label">Birim Tutar</div>
+            <div class="result-value" id="hrBirim" style="color:#f59e0b;">-</div>
+          </div>
+          <div class="result-item">
+            <div class="result-label">Toplam Tutar</div>
+            <div class="result-value" id="hrTotal" style="color:#22c55e;">-</div>
+          </div>
+        </div>
+
+        <div style="margin-top: 14px; display: flex; gap: 10px;">
+          <button class="btn btn-primary" onclick="hesapTemizle()">🗑️ Temizle</button>
+          <button class="btn btn-success" onclick="window.print()">🖨️ Yazdır</button>
         </div>
       </div>
-      <div style="overflow-x: auto;">
-        <table>
-          <thead>
-            <tr>
-              <th>Tarih</th>
-              <th>Müşteri</th>
-              <th>Telefon</th>
-              <th>En × Boy</th>
-              <th>m²</th>
-              <th>Adet</th>
-              <th>m² Fiyat</th>
-              <th>Toplam</th>
-              <th>Tür</th>
-              <th>Not</th>
-              <th class="no-print"></th>
-            </tr>
-          </thead>
-          <tbody id="gecmisBody">
-            <tr><td colspan="11" style="text-align: center; color: #64748b;">Henüz kayıt yok</td></tr>
-          </tbody>
-        </table>
+    </div>
+
+    <!-- ═══════════ TAB 2: SİPARİŞLER ═══════════ -->
+    <div class="tab-content" id="tab2">
+      <div class="card no-print">
+        <h3 class="card-title">📋 Yeni Sipariş</h3>
+        <div class="form-grid">
+          <div>
+            <label class="label">Müşteri Adı</label>
+            <input class="input" id="sipMusteri" placeholder="Müşteri adı" />
+          </div>
+          <div>
+            <label class="label">Telefon</label>
+            <input class="input" id="sipTelefon" placeholder="05xx xxx xx xx" />
+          </div>
+          <div class="search-box">
+            <label class="label">Halı Modeli</label>
+            <input class="input" id="sipModel" placeholder="🔍 Model ara..." oninput="sipModelAra()" onfocus="sipModelAra()" />
+            <div class="search-list" id="sipModelList" style="display:none;"></div>
+          </div>
+          <div>
+            <label class="label">Ölçü (En × Boy)</label>
+            <input class="input" id="sipOlcu" placeholder="örn: 3x4.5" />
+          </div>
+          <div>
+            <label class="label">m²</label>
+            <input class="input" type="number" step="0.01" id="sipM2" placeholder="Otomatik" />
+          </div>
+          <div>
+            <label class="label">Satış Fiyatı (₺)</label>
+            <input class="input" type="number" step="0.01" id="sipFiyat" placeholder="Toplam fiyat" />
+          </div>
+          <div>
+            <label class="label">Kapora (₺)</label>
+            <input class="input" type="number" step="0.01" id="sipKapora" value="0" oninput="sipKalanHesapla()" />
+          </div>
+          <div>
+            <label class="label">Kalan Tutar (₺)</label>
+            <input class="input" type="number" id="sipKalan" readonly style="background:#0f172a; color:#f59e0b; font-weight:700;" />
+          </div>
+          <div>
+            <label class="label">Sipariş Tarihi</label>
+            <input class="input" type="date" id="sipTarih" />
+          </div>
+          <div>
+            <label class="label">Teslim Tarihi</label>
+            <input class="input" type="date" id="sipTeslimTarih" />
+          </div>
+          <div>
+            <label class="label">Durum</label>
+            <select class="input" id="sipDurum">
+              <option value="bekliyor">Bekliyor</option>
+              <option value="teslim">Teslim Edildi</option>
+              <option value="iptal">İptal</option>
+            </select>
+          </div>
+          <div>
+            <label class="label">Not</label>
+            <input class="input" id="sipNot" placeholder="Adres, detay vb." />
+          </div>
+        </div>
+        <button class="btn btn-primary" style="margin-top: 14px;" onclick="sipKaydet()">✅ Siparişi Kaydet</button>
+      </div>
+
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+          <h3 class="card-title" style="margin-bottom: 0;">Sipariş Listesi</h3>
+          <div class="no-print" style="display: flex; gap: 8px; align-items: center;">
+            <select class="input" id="sipFiltre" style="max-width:140px;" onchange="sipListele()">
+              <option value="tumu">Tümü</option>
+              <option value="bekliyor">Bekleyenler</option>
+              <option value="teslim">Teslim Edilenler</option>
+              <option value="iptal">İptaller</option>
+            </select>
+            <input class="input" id="sipArama" placeholder="🔍 Müşteri ara..." style="max-width: 180px;" oninput="sipListele()" />
+          </div>
+        </div>
+        <div style="overflow-x: auto;">
+          <table>
+            <thead><tr>
+              <th>Tarih</th><th>Müşteri</th><th>Tel</th><th>Model</th><th>Ölçü</th><th>m²</th><th>Fiyat</th><th>Kapora</th><th>Kalan</th><th>Teslim</th><th>Durum</th><th class="no-print"></th>
+            </tr></thead>
+            <tbody id="sipBody"><tr><td colspan="12" style="text-align:center;color:#64748b;">Henüz sipariş yok</td></tr></tbody>
+          </table>
+        </div>
       </div>
     </div>
 
   </div>
 
   <script>
-    // Bugünün tarihini otomatik yaz
-    document.getElementById("tarih").value = new Date().toISOString().slice(0, 10);
-
-    // LocalStorage ile veri yönetimi
-    function getKayitlar() {
-      try { return JSON.parse(localStorage.getItem("hali_kayitlar") || "[]"); }
-      catch(e) { return []; }
+    // ─── STORAGE ───
+    function getData(key) {
+      try { return JSON.parse(localStorage.getItem("hali_" + key) || "[]"); } catch(e) { return []; }
     }
-    function setKayitlar(data) {
-      localStorage.setItem("hali_kayitlar", JSON.stringify(data));
+    function setData(key, val) { localStorage.setItem("hali_" + key, JSON.stringify(val)); }
+    function formatTL(n) { return "\u20BA" + Number(n || 0).toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+    function todayStr() { return new Date().toISOString().slice(0, 10); }
+
+    // ─── TAB SWITCH ───
+    function switchTab(idx) {
+      document.querySelectorAll(".tab-content").forEach(function(el, i) {
+        el.classList.toggle("active", i === idx);
+      });
+      document.querySelectorAll(".tab-btn").forEach(function(el, i) {
+        el.classList.toggle("active", i === idx);
+      });
     }
 
-    function formatTL(n) {
-      return "₺" + Number(n || 0).toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    // ═══════════ STOK ═══════════
+    function stokEkle() {
+      var model = document.getElementById("stokModel").value.trim();
+      var m2fiyat = parseFloat(document.getElementById("stokM2Fiyat").value);
+      if (!model) return alert("Model adı giriniz!");
+      if (!m2fiyat) return alert("m² fiyatı giriniz!");
+
+      var stoklar = getData("stok");
+      stoklar.push({
+        id: Date.now(),
+        model: model,
+        kategori: document.getElementById("stokKategori").value,
+        m2fiyat: m2fiyat,
+        stok: parseFloat(document.getElementById("stokMiktar").value) || 0,
+        en: parseFloat(document.getElementById("stokEn").value) || 0,
+        not: document.getElementById("stokNot").value.trim()
+      });
+      setData("stok", stoklar);
+      stokListele();
+
+      document.getElementById("stokModel").value = "";
+      document.getElementById("stokM2Fiyat").value = "";
+      document.getElementById("stokMiktar").value = "";
+      document.getElementById("stokEn").value = "";
+      document.getElementById("stokNot").value = "";
+      alert("Model eklendi!");
     }
 
-    // Canlı hesaplama
-    function hesapla() {
-      var en = parseFloat(document.getElementById("en").value) || 0;
-      var boy = parseFloat(document.getElementById("boy").value) || 0;
-      var fiyat = parseFloat(document.getElementById("m2fiyat").value) || 0;
-      var adet = parseInt(document.getElementById("adet").value) || 1;
+    function stokSil(id) {
+      if (!confirm("Bu modeli silmek istediğinize emin misiniz?")) return;
+      setData("stok", getData("stok").filter(function(s) { return s.id !== id; }));
+      stokListele();
+    }
 
-      var m2 = en * boy;
-      var toplamM2 = m2 * adet;
-      var birimTutar = m2 * fiyat;
-      var toplam = birimTutar * adet;
+    var stokEditId = null;
+    function stokDuzenle(id) {
+      var stoklar = getData("stok");
+      var s = stoklar.find(function(x) { return x.id === id; });
+      if (!s) return;
+      stokEditId = id;
+      document.getElementById("stokModel").value = s.model;
+      document.getElementById("stokKategori").value = s.kategori || "Halı";
+      document.getElementById("stokM2Fiyat").value = s.m2fiyat;
+      document.getElementById("stokMiktar").value = s.stok || "";
+      document.getElementById("stokEn").value = s.en || "";
+      document.getElementById("stokNot").value = s.not || "";
 
-      var box = document.getElementById("resultBox");
-      if (en > 0 && boy > 0) {
+      var btn = document.querySelector("#tab0 .btn-primary");
+      btn.textContent = "💾 Güncelle";
+      btn.onclick = function() {
+        var stoklar = getData("stok");
+        stoklar = stoklar.map(function(x) {
+          if (x.id !== stokEditId) return x;
+          return {
+            id: x.id,
+            model: document.getElementById("stokModel").value.trim(),
+            kategori: document.getElementById("stokKategori").value,
+            m2fiyat: parseFloat(document.getElementById("stokM2Fiyat").value) || 0,
+            stok: parseFloat(document.getElementById("stokMiktar").value) || 0,
+            en: parseFloat(document.getElementById("stokEn").value) || 0,
+            not: document.getElementById("stokNot").value.trim()
+          };
+        });
+        setData("stok", stoklar);
+        stokListele();
+        stokEditId = null;
+        btn.textContent = "✅ Modeli Ekle";
+        btn.onclick = stokEkle;
+        document.getElementById("stokModel").value = "";
+        document.getElementById("stokM2Fiyat").value = "";
+        document.getElementById("stokMiktar").value = "";
+        document.getElementById("stokEn").value = "";
+        document.getElementById("stokNot").value = "";
+      };
+    }
+
+    function stokListele() {
+      var stoklar = getData("stok");
+      var arama = (document.getElementById("stokArama").value || "").toLocaleLowerCase("tr");
+      if (arama) {
+        stoklar = stoklar.filter(function(s) { return s.model.toLocaleLowerCase("tr").indexOf(arama) !== -1; });
+      }
+      var tbody = document.getElementById("stokBody");
+      if (stoklar.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#64748b;">Model bulunamadı</td></tr>';
+        return;
+      }
+      var html = "";
+      stoklar.forEach(function(s) {
+        var stockClass = s.stok > 10 ? "stock-ok" : s.stok > 0 ? "stock-low" : "stock-out";
+        var stockLabel = s.stok > 10 ? "Yeterli" : s.stok > 0 ? "Az" : "Yok";
+        html += '<tr>'
+          + '<td style="font-weight:600;color:#f1f5f9;">' + s.model + '</td>'
+          + '<td>' + (s.kategori || "Halı") + '</td>'
+          + '<td style="color:#8b5cf6;font-weight:600;">' + formatTL(s.m2fiyat) + '</td>'
+          + '<td>' + (s.en ? s.en + " m" : "-") + '</td>'
+          + '<td><span class="stock-badge ' + stockClass + '">' + (s.stok || 0) + ' m² (' + stockLabel + ')</span></td>'
+          + '<td style="max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + (s.not||"") + '">' + (s.not || "-") + '</td>'
+          + '<td class="no-print"><button class="btn btn-sm btn-edit" onclick="stokDuzenle(' + s.id + ')">Düzenle</button> <button class="btn btn-sm btn-danger" onclick="stokSil(' + s.id + ')">Sil</button></td>'
+          + '</tr>';
+      });
+      tbody.innerHTML = html;
+    }
+
+    // ═══════════ HESAPLAMA ═══════════
+    var seciliModelId = null;
+
+    function hesapModelAra() {
+      var val = document.getElementById("hesapModel").value.toLocaleLowerCase("tr");
+      var stoklar = getData("stok");
+      var list = document.getElementById("hesapModelList");
+      if (!val && stoklar.length > 0) {
+        // tümünü göster
+      }
+      var filtered = stoklar.filter(function(s) {
+        return s.model.toLocaleLowerCase("tr").indexOf(val) !== -1;
+      });
+      if (filtered.length === 0) { list.style.display = "none"; return; }
+      list.style.display = "block";
+      list.innerHTML = filtered.map(function(s) {
+        return '<div class="search-item" onclick="hesapModelSec(' + s.id + ')">'
+          + '<div>' + s.model + '</div>'
+          + '<div class="search-item-sub">' + (s.kategori||"Halı") + ' | ' + formatTL(s.m2fiyat) + '/m²' + (s.en ? ' | En: ' + s.en + 'm' : '') + '</div>'
+          + '</div>';
+      }).join("");
+    }
+
+    function hesapModelSec(id) {
+      var s = getData("stok").find(function(x) { return x.id === id; });
+      if (!s) return;
+      seciliModelId = id;
+      document.getElementById("hesapModel").value = s.model;
+      document.getElementById("hesapM2Fiyat").value = s.m2fiyat;
+      document.getElementById("hesapModelList").style.display = "none";
+      if (s.en) document.getElementById("hesapEn").value = s.en;
+      hesapYap();
+    }
+
+    function hesapYap() {
+      var en = parseFloat(document.getElementById("hesapEn").value) || 0;
+      var boy = parseFloat(document.getElementById("hesapBoy").value) || 0;
+      var fiyat = parseFloat(document.getElementById("hesapM2Fiyat").value) || 0;
+      var adet = parseInt(document.getElementById("hesapAdet").value) || 1;
+      var box = document.getElementById("hesapResult");
+
+      if (en > 0 && boy > 0 && fiyat > 0) {
+        var m2 = en * boy;
+        var totalM2 = m2 * adet;
+        var birim = m2 * fiyat;
+        var total = birim * adet;
         box.style.display = "flex";
-        document.getElementById("resM2").textContent = m2.toFixed(2) + " m²";
-        document.getElementById("resTotalM2").textContent = toplamM2.toFixed(2) + " m²";
-        document.getElementById("resBirim").textContent = formatTL(birimTutar);
-        document.getElementById("resTotal").textContent = formatTL(toplam);
+        document.getElementById("hrModel").textContent = document.getElementById("hesapModel").value || "-";
+        document.getElementById("hrM2").textContent = m2.toFixed(2) + " m\u00B2";
+        document.getElementById("hrTotalM2").textContent = totalM2.toFixed(2) + " m\u00B2";
+        document.getElementById("hrBirim").textContent = formatTL(birim);
+        document.getElementById("hrTotal").textContent = formatTL(total);
       } else {
         box.style.display = "none";
       }
     }
 
-    // Kaydet
-    function kaydet() {
-      var en = parseFloat(document.getElementById("en").value);
-      var boy = parseFloat(document.getElementById("boy").value);
-      var fiyat = parseFloat(document.getElementById("m2fiyat").value);
-      var adet = parseInt(document.getElementById("adet").value) || 1;
+    function hesapTemizle() {
+      seciliModelId = null;
+      document.getElementById("hesapModel").value = "";
+      document.getElementById("hesapM2Fiyat").value = "";
+      document.getElementById("hesapEn").value = "";
+      document.getElementById("hesapBoy").value = "";
+      document.getElementById("hesapAdet").value = "1";
+      document.getElementById("hesapResult").style.display = "none";
+    }
 
-      if (!en || !boy) return alert("En ve boy giriniz!");
-      if (!fiyat) return alert("m² fiyatı giriniz!");
+    // ═══════════ SİPARİŞLER ═══════════
+    var sipSeciliModel = "";
 
-      var m2 = en * boy;
-      var toplam = m2 * fiyat * adet;
+    function sipModelAra() {
+      var val = document.getElementById("sipModel").value.toLocaleLowerCase("tr");
+      var stoklar = getData("stok");
+      var list = document.getElementById("sipModelList");
+      var filtered = stoklar.filter(function(s) {
+        return s.model.toLocaleLowerCase("tr").indexOf(val) !== -1;
+      });
+      if (filtered.length === 0) { list.style.display = "none"; return; }
+      list.style.display = "block";
+      list.innerHTML = filtered.map(function(s) {
+        return '<div class="search-item" onclick="sipModelSec(\'' + s.model.replace(/'/g, "\\'") + '\')">'
+          + '<div>' + s.model + '</div>'
+          + '<div class="search-item-sub">' + formatTL(s.m2fiyat) + '/m²</div>'
+          + '</div>';
+      }).join("");
+    }
 
-      var kayit = {
+    function sipModelSec(model) {
+      sipSeciliModel = model;
+      document.getElementById("sipModel").value = model;
+      document.getElementById("sipModelList").style.display = "none";
+    }
+
+    function sipKalanHesapla() {
+      var fiyat = parseFloat(document.getElementById("sipFiyat").value) || 0;
+      var kapora = parseFloat(document.getElementById("sipKapora").value) || 0;
+      document.getElementById("sipKalan").value = (fiyat - kapora).toFixed(2);
+    }
+
+    // Ölçü alanından m² otomatik hesapla
+    document.getElementById("sipOlcu").addEventListener("input", function() {
+      var val = this.value.replace(/\s/g, "").replace(",", ".");
+      var parts = val.split("x");
+      if (parts.length === 2) {
+        var en = parseFloat(parts[0]);
+        var boy = parseFloat(parts[1]);
+        if (en > 0 && boy > 0) {
+          document.getElementById("sipM2").value = (en * boy).toFixed(2);
+        }
+      }
+    });
+
+    document.getElementById("sipFiyat").addEventListener("input", sipKalanHesapla);
+
+    function sipKaydet() {
+      var musteri = document.getElementById("sipMusteri").value.trim();
+      if (!musteri) return alert("Müşteri adı giriniz!");
+      var fiyat = parseFloat(document.getElementById("sipFiyat").value);
+      if (!fiyat) return alert("Satış fiyatı giriniz!");
+
+      var kapora = parseFloat(document.getElementById("sipKapora").value) || 0;
+
+      var sip = {
         id: Date.now(),
-        tarih: document.getElementById("tarih").value,
-        musteri: document.getElementById("musteriAdi").value || "-",
-        telefon: document.getElementById("telefon").value || "-",
-        en: en,
-        boy: boy,
-        m2: m2,
-        adet: adet,
-        m2fiyat: fiyat,
-        toplam: toplam,
-        tur: document.getElementById("islemTuru").value,
-        not: document.getElementById("not").value || ""
+        musteri: musteri,
+        telefon: document.getElementById("sipTelefon").value.trim(),
+        model: document.getElementById("sipModel").value.trim(),
+        olcu: document.getElementById("sipOlcu").value.trim(),
+        m2: parseFloat(document.getElementById("sipM2").value) || 0,
+        fiyat: fiyat,
+        kapora: kapora,
+        kalan: fiyat - kapora,
+        tarih: document.getElementById("sipTarih").value || todayStr(),
+        teslimTarih: document.getElementById("sipTeslimTarih").value || "",
+        durum: document.getElementById("sipDurum").value,
+        not: document.getElementById("sipNot").value.trim()
       };
 
-      var kayitlar = getKayitlar();
-      kayitlar.unshift(kayit);
-      setKayitlar(kayitlar);
-      listele();
-      temizle();
-      alert("Kayıt eklendi!");
+      var siparisler = getData("siparis");
+      siparisler.unshift(sip);
+      setData("siparis", siparisler);
+      sipListele();
+
+      // Formu temizle
+      ["sipMusteri","sipTelefon","sipModel","sipOlcu","sipM2","sipFiyat","sipKalan","sipNot"].forEach(function(id) {
+        document.getElementById(id).value = "";
+      });
+      document.getElementById("sipKapora").value = "0";
+      document.getElementById("sipDurum").value = "bekliyor";
+      document.getElementById("sipTeslimTarih").value = "";
+      document.getElementById("sipTarih").value = todayStr();
+      alert("Sipariş kaydedildi!");
     }
 
-    // Temizle
-    function temizle() {
-      document.getElementById("musteriAdi").value = "";
-      document.getElementById("telefon").value = "";
-      document.getElementById("tarih").value = new Date().toISOString().slice(0, 10);
-      document.getElementById("islemTuru").value = "kesim";
-      document.getElementById("en").value = "";
-      document.getElementById("boy").value = "";
-      document.getElementById("m2fiyat").value = "";
-      document.getElementById("adet").value = "1";
-      document.getElementById("not").value = "";
-      document.getElementById("resultBox").style.display = "none";
+    function sipSil(id) {
+      if (!confirm("Bu siparişi silmek istediğinize emin misiniz?")) return;
+      setData("siparis", getData("siparis").filter(function(s) { return s.id !== id; }));
+      sipListele();
     }
 
-    // Sil
-    function sil(id) {
-      if (!confirm("Bu kaydı silmek istediğinize emin misiniz?")) return;
-      var kayitlar = getKayitlar().filter(function(k) { return k.id !== id; });
-      setKayitlar(kayitlar);
-      listele();
+    function sipDurumDegistir(id, yeniDurum) {
+      var siparisler = getData("siparis").map(function(s) {
+        if (s.id === id) s.durum = yeniDurum;
+        return s;
+      });
+      setData("siparis", siparisler);
+      sipListele();
     }
 
-    // Listele
-    function listele() {
-      var kayitlar = getKayitlar();
-      var arama = (document.getElementById("aramaInput").value || "").toLocaleLowerCase("tr");
+    function sipListele() {
+      var siparisler = getData("siparis");
+      var filtre = document.getElementById("sipFiltre").value;
+      var arama = (document.getElementById("sipArama").value || "").toLocaleLowerCase("tr");
+
+      if (filtre !== "tumu") {
+        siparisler = siparisler.filter(function(s) { return s.durum === filtre; });
+      }
       if (arama) {
-        kayitlar = kayitlar.filter(function(k) {
-          return k.musteri.toLocaleLowerCase("tr").indexOf(arama) !== -1 ||
-                 k.telefon.indexOf(arama) !== -1;
+        siparisler = siparisler.filter(function(s) {
+          return s.musteri.toLocaleLowerCase("tr").indexOf(arama) !== -1 ||
+                 (s.telefon && s.telefon.indexOf(arama) !== -1);
         });
       }
 
-      var tbody = document.getElementById("gecmisBody");
-
-      if (kayitlar.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="11" style="text-align: center; color: #64748b;">Kayıt bulunamadı</td></tr>';
+      var tbody = document.getElementById("sipBody");
+      if (siparisler.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="12" style="text-align:center;color:#64748b;">Sipariş bulunamadı</td></tr>';
         return;
       }
 
+      var badgeClass = { bekliyor: "badge-bekliyor", teslim: "badge-teslim", iptal: "badge-iptal" };
+      var durumLabel = { bekliyor: "Bekliyor", teslim: "Teslim", iptal: "İptal" };
+
       var html = "";
-      var badgeClass = { kesim: "badge-kesim", serme: "badge-serme", diger: "badge-diger" };
-      var turLabel = { kesim: "Kesim", serme: "Serme", diger: "Diğer" };
-
-      kayitlar.forEach(function(k) {
+      siparisler.forEach(function(s) {
         html += '<tr>'
-          + '<td>' + k.tarih + '</td>'
-          + '<td style="font-weight: 600; color: #f1f5f9;">' + k.musteri + '</td>'
-          + '<td>' + k.telefon + '</td>'
-          + '<td>' + k.en + ' × ' + k.boy + '</td>'
-          + '<td style="color: #8b5cf6; font-weight: 600;">' + k.m2.toFixed(2) + '</td>'
-          + '<td>' + (k.adet || 1) + '</td>'
-          + '<td>' + formatTL(k.m2fiyat) + '</td>'
-          + '<td style="color: #22c55e; font-weight: 700;">' + formatTL(k.toplam) + '</td>'
-          + '<td><span class="badge ' + (badgeClass[k.tur] || "badge-diger") + '">' + (turLabel[k.tur] || k.tur) + '</span></td>'
-          + '<td style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="' + (k.not || "") + '">' + (k.not || "-") + '</td>'
-          + '<td class="no-print"><button class="btn-danger" onclick="sil(' + k.id + ')">Sil</button></td>'
-          + '</tr>';
+          + '<td>' + (s.tarih || "-") + '</td>'
+          + '<td style="font-weight:600;color:#f1f5f9;">' + s.musteri + '</td>'
+          + '<td>' + (s.telefon || "-") + '</td>'
+          + '<td>' + (s.model || "-") + '</td>'
+          + '<td>' + (s.olcu || "-") + '</td>'
+          + '<td>' + (s.m2 ? s.m2.toFixed(2) : "-") + '</td>'
+          + '<td style="color:#22c55e;font-weight:600;">' + formatTL(s.fiyat) + '</td>'
+          + '<td style="color:#60a5fa;">' + formatTL(s.kapora) + '</td>'
+          + '<td style="color:#f59e0b;font-weight:700;">' + formatTL(s.kalan) + '</td>'
+          + '<td>' + (s.teslimTarih || "-") + '</td>'
+          + '<td><span class="badge ' + (badgeClass[s.durum] || "badge-bekliyor") + '">' + (durumLabel[s.durum] || s.durum) + '</span></td>'
+          + '<td class="no-print" style="white-space:nowrap;">'
+          + (s.durum === "bekliyor" ? '<button class="btn btn-sm btn-success" style="margin-right:4px;" onclick="sipDurumDegistir(' + s.id + ',\'teslim\')">Teslim</button>' : '')
+          + '<button class="btn btn-sm btn-danger" onclick="sipSil(' + s.id + ')">Sil</button>'
+          + '</td></tr>';
       });
-
       tbody.innerHTML = html;
     }
 
-    // Sayfa yüklendiğinde listele
-    listele();
+    // Dışına tıkla kapat
+    document.addEventListener("click", function(e) {
+      if (!e.target.closest(".search-box")) {
+        document.getElementById("hesapModelList").style.display = "none";
+        document.getElementById("sipModelList").style.display = "none";
+      }
+    });
+
+    // Başlangıç
+    document.getElementById("sipTarih").value = todayStr();
+    stokListele();
+    sipListele();
   </script>
 
 </body>
