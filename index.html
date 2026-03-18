@@ -246,8 +246,12 @@
             <div class="result-value" id="hrBirim" style="color:#f59e0b;">-</div>
           </div>
           <div class="result-item">
-            <div class="result-label">Toplam Tutar</div>
+            <div class="result-label">Toplam Maliyet</div>
             <div class="result-value" id="hrTotal" style="color:#22c55e;">-</div>
+          </div>
+          <div class="result-item" style="border-top: 2px solid #8b5cf6; flex: 1 1 100%; margin-top: 8px; padding-top: 12px;">
+            <div class="result-label">Satış Fiyatı (Maliyet ×2 + %10)</div>
+            <div class="result-value" id="hrSatis" style="color:#f43f5e; font-size: 22px;">-</div>
           </div>
         </div>
 
@@ -521,6 +525,8 @@
         document.getElementById("hrTotalM2").textContent = totalM2.toFixed(2) + " m\u00B2";
         document.getElementById("hrBirim").textContent = formatTL(birim);
         document.getElementById("hrTotal").textContent = formatTL(total);
+        var satisFiyat = total * 2 * 1.10;
+        document.getElementById("hrSatis").textContent = formatTL(satisFiyat);
       } else {
         box.style.display = "none";
       }
