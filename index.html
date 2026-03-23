@@ -133,11 +133,33 @@
 </head>
 <body>
 
+  <!-- ═══════════ GİRİŞ EKRANI ═══════════ -->
+  <div id="loginScreen" style="min-height:100vh; display:flex; align-items:center; justify-content:center; background:#0a0f1e;">
+    <div style="background:#0f172a; border:1px solid #1e293b; border-radius:20px; padding:40px; width:320px; text-align:center;">
+      <div style="width:64px; height:64px; border-radius:16px; background:linear-gradient(135deg,#8b5cf6,#6d28d9); display:flex; align-items:center; justify-content:center; font-size:24px; font-weight:900; color:#fff; margin:0 auto 16px;">TH</div>
+      <h2 style="color:#f1f5f9; margin-bottom:24px; font-size:20px;">Halı Yönetim</h2>
+      <div style="margin-bottom:14px; text-align:left;">
+        <label class="label">Kullanıcı Adı</label>
+        <input class="input" id="loginUser" placeholder="Kullanıcı adı" onkeydown="if(event.key==='Enter')girisYap()" />
+      </div>
+      <div style="margin-bottom:20px; text-align:left;">
+        <label class="label">Şifre</label>
+        <input class="input" id="loginPass" type="password" placeholder="Şifre" onkeydown="if(event.key==='Enter')girisYap()" />
+      </div>
+      <div id="loginError" style="color:#fca5a5; font-size:13px; margin-bottom:12px; display:none;">Kullanıcı adı veya şifre hatalı!</div>
+      <button class="btn btn-primary" style="width:100%; padding:12px;" onclick="girisYap()">Giriş Yap</button>
+    </div>
+  </div>
+
+  <!-- ═══════════ ANA UYGULAMA ═══════════ -->
+  <div id="mainApp" style="display:none;">
+
   <div class="header">
     <div class="header-left">
       <div class="logo">TH</div>
       <div><h1>Halı Yönetim</h1></div>
     </div>
+    <button class="btn btn-ghost btn-sm" onclick="cikisYap()">Çıkış</button>
   </div>
 
   <div class="tabs no-print">
@@ -158,26 +180,8 @@
             <input class="input" id="stokModel" placeholder="örn: Klasik Bordo" />
           </div>
           <div>
-            <label class="label">Kategori</label>
-            <select class="input" id="stokKategori">
-              <option value="Halı">Halı</option>
-              <option value="Yolluk">Yolluk</option>
-              <option value="Paspas">Paspas</option>
-              <option value="Kilim">Kilim</option>
-              <option value="Diğer">Diğer</option>
-            </select>
-          </div>
-          <div>
             <label class="label">m² Fiyatı (₺)</label>
             <input class="input" type="number" step="0.01" id="stokM2Fiyat" placeholder="örn: 350" />
-          </div>
-          <div>
-            <label class="label">Stok (m²)</label>
-            <input class="input" type="number" step="0.01" id="stokMiktar" placeholder="örn: 50" />
-          </div>
-          <div>
-            <label class="label">En (metre)</label>
-            <input class="input" type="number" step="0.01" id="stokEn" placeholder="örn: 2.00" />
           </div>
           <div>
             <label class="label">Not</label>
@@ -195,9 +199,9 @@
         <div style="overflow-x: auto;">
           <table>
             <thead><tr>
-              <th>Model</th><th>Kategori</th><th>m² Fiyat</th><th>En</th><th>Stok (m²)</th><th>Not</th><th class="no-print"></th>
+              <th>Model Adı</th><th>m² Fiyat</th><th>Not</th><th class="no-print"></th>
             </tr></thead>
-            <tbody id="stokBody"><tr><td colspan="7" style="text-align:center;color:#64748b;">Henüz model eklenmedi</td></tr></tbody>
+            <tbody id="stokBody"><tr><td colspan="4" style="text-align:center;color:#64748b;">Henüz model eklenmedi</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -214,7 +218,16 @@
             <div class="search-list" id="hesapModelList" style="display:none;"></div>
           </div>
           <div>
-            <label class="label">m² Fiyatı (₺)</label>
+            <label class="label">Model</label>
+            <select class="input" id="hesapModelTip" onchange="hesapYap()">
+              <option value="Düz">Düz</option>
+              <option value="Oval">Oval (+₺45/m²)</option>
+              <option value="Yuvarlak">Yuvarlak (+₺45/m²)</option>
+              <option value="Diğer">Diğer</option>
+            </select>
+          </div>
+          <div>
+            <label class="label">m² Satış Fiyatı (₺)</label>
             <input class="input" type="number" id="hesapM2Fiyat" readonly style="background:#0f172a; color:#8b5cf6; font-weight:700;" />
           </div>
           <div>
@@ -224,6 +237,18 @@
           <div>
             <label class="label">Boy (metre)</label>
             <input class="input" type="number" step="0.01" id="hesapBoy" placeholder="örn: 4.50" oninput="hesapYap()" />
+          </div>
+          <div>
+            <label class="label">Taksit</label>
+            <select class="input" id="hesapTaksit" onchange="hesapYap()">
+              <option value="0">Peşin</option>
+              <option value="4">4 Taksit (%9.47)</option>
+              <option value="5">5 Taksit (%11.34)</option>
+              <option value="6">6 Taksit (%13.22)</option>
+              <option value="7">7 Taksit (%15.09)</option>
+              <option value="8">8 Taksit (%16.96)</option>
+              <option value="9">9 Taksit (%18.84)</option>
+            </select>
           </div>
           <div>
             <label class="label">Adet</label>
@@ -245,17 +270,37 @@
             <div class="result-value" id="hrTotalM2" style="color:#a78bfa;">-</div>
           </div>
           <div class="result-item" onclick="this.classList.toggle('goster')" style="cursor:pointer;">
-            <div class="result-label">Birim Tutar 🔒</div>
+            <div class="result-label">BM 🔒</div>
             <div class="result-value" id="hrBirim" style="color:#f59e0b; filter:blur(8px); transition:filter 0.3s;">-</div>
           </div>
           <div class="result-item" onclick="this.classList.toggle('goster')" style="cursor:pointer;">
-            <div class="result-label">Toplam Maliyet 🔒</div>
+            <div class="result-label">TM 🔒</div>
             <div class="result-value" id="hrTotal" style="color:#22c55e; filter:blur(8px); transition:filter 0.3s;">-</div>
           </div>
           <div class="result-item" style="border-top: 2px solid #8b5cf6; flex: 1 1 100%; margin-top: 8px; padding-top: 12px;">
-            <div class="result-label">Satış Fiyatı (Maliyet ×2 + %10)</div>
+            <div class="result-label">Satış Fiyatı</div>
             <div class="result-value" id="hrSatis" style="color:#f43f5e; font-size: 22px;">-</div>
           </div>
+          <div class="result-item" id="hrTaksitBox" style="border-top: 1px solid #334155; flex: 1 1 100%; margin-top: 8px; padding-top: 12px; display:none;">
+            <div class="result-label">Taksitli Satış Fiyatı</div>
+            <div class="result-value" id="hrTaksitFiyat" style="color:#a78bfa; font-size: 20px;">-</div>
+            <div id="hrTaksitDetay" style="color:#94a3b8; font-size: 13px; margin-top: 6px;"></div>
+          </div>
+        </div>
+
+        <div class="card" id="hesapOdemeBox" style="display:none; margin-top: 16px;">
+          <h3 class="card-title">💳 Ödeme Yöntemi</h3>
+          <div class="form-grid">
+            <div>
+              <label class="label">Ödeme</label>
+              <select class="input" id="hesapOdeme">
+                <option value="nakit">Nakit</option>
+                <option value="kredi_karti">Kredi Kartı</option>
+                <option value="havale">Havale/EFT</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-success" style="margin-top: 14px;" onclick="siparisOlustur()">📋 Sipariş Oluştur</button>
         </div>
 
         <div style="margin-top: 14px; display: flex; gap: 10px;">
@@ -312,6 +357,14 @@
             <input class="input" type="date" id="sipTeslimTarih" />
           </div>
           <div>
+            <label class="label">Ödeme Yöntemi</label>
+            <select class="input" id="sipOdeme">
+              <option value="nakit">Nakit</option>
+              <option value="kredi_karti">Kredi Kartı</option>
+              <option value="havale">Havale/EFT</option>
+            </select>
+          </div>
+          <div>
             <label class="label">Durum</label>
             <select class="input" id="sipDurum">
               <option value="bekliyor">Bekliyor</option>
@@ -353,12 +406,94 @@
 
   </div>
 
+  </div><!-- /mainApp -->
+
   <script>
-    // ─── STORAGE ───
-    function getData(key) {
-      try { return JSON.parse(localStorage.getItem("hali_" + key) || "[]"); } catch(e) { return []; }
+    // ─── GİRİŞ SİSTEMİ ───
+    function girisYap() {
+      var user = document.getElementById("loginUser").value.trim();
+      var pass = document.getElementById("loginPass").value;
+      if (user === "tela" && pass === "123") {
+        document.getElementById("loginScreen").style.display = "none";
+        document.getElementById("mainApp").style.display = "block";
+        sessionStorage.setItem("hali_login", "1");
+        document.getElementById("loginError").style.display = "none";
+      } else {
+        document.getElementById("loginError").style.display = "block";
+      }
     }
-    function setData(key, val) { localStorage.setItem("hali_" + key, JSON.stringify(val)); }
+
+    function cikisYap() {
+      sessionStorage.removeItem("hali_login");
+      document.getElementById("mainApp").style.display = "none";
+      document.getElementById("loginScreen").style.display = "flex";
+      document.getElementById("loginUser").value = "";
+      document.getElementById("loginPass").value = "";
+    }
+
+    // Oturum kontrolü
+    if (sessionStorage.getItem("hali_login") === "1") {
+      document.getElementById("loginScreen").style.display = "none";
+      document.getElementById("mainApp").style.display = "block";
+    }
+
+    // ─── SUPABASE CONFIG ───
+    var SB_URL = "https://trrktuelkxuulyrhlewe.supabase.co";
+    var SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRycmt0dWVsa3h1dWx5cmhsZXdlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3OTksImV4cCI6MjA4OTg1Nzc5OX0.akF-t15r8APvxAIZZthDcLV_xIjyK7Tl9Ze1DzB2tD4";
+
+    // ─── MEMORY CACHE ───
+    var _cache = { stok: null, siparis: null };
+
+    function sbHeaders() {
+      return {
+        "apikey": SB_KEY,
+        "Authorization": "Bearer " + SB_KEY,
+        "Content-Type": "application/json",
+        "Prefer": "return=representation"
+      };
+    }
+
+    // ─── SUPABASE CRUD ───
+    function sbGetAll(table) {
+      return fetch(SB_URL + "/rest/v1/" + table + "?select=*&order=id.desc", {
+        headers: sbHeaders()
+      }).then(function(r) { return r.json(); })
+        .then(function(data) { _cache[table] = data; return data; })
+        .catch(function(e) { console.error("SB GET ERROR:", table, e); return _cache[table] || []; });
+    }
+
+    function sbInsert(table, row) {
+      return fetch(SB_URL + "/rest/v1/" + table, {
+        method: "POST",
+        headers: sbHeaders(),
+        body: JSON.stringify(row)
+      }).then(function(r) { return r.json(); })
+        .catch(function(e) { console.error("SB INSERT ERROR:", table, e); });
+    }
+
+    function sbUpdate(table, id, row) {
+      return fetch(SB_URL + "/rest/v1/" + table + "?id=eq." + id, {
+        method: "PATCH",
+        headers: sbHeaders(),
+        body: JSON.stringify(row)
+      }).then(function(r) { return r.json(); })
+        .catch(function(e) { console.error("SB UPDATE ERROR:", table, e); });
+    }
+
+    function sbDelete(table, id) {
+      return fetch(SB_URL + "/rest/v1/" + table + "?id=eq." + id, {
+        method: "DELETE",
+        headers: sbHeaders()
+      }).then(function(r) { return r.text(); })
+        .catch(function(e) { console.error("SB DELETE ERROR:", table, e); });
+    }
+
+    // ─── COMPAT LAYER ───
+    function getData(key) {
+      return _cache[key] || [];
+    }
+    function setData(key, val) { /* artik kullanilmiyor */ }
+
     function formatTL(n) { return "\u20BA" + Number(n || 0).toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
     function todayStr() { return new Date().toISOString().slice(0, 10); }
 
@@ -379,31 +514,31 @@
       if (!model) return alert("Model adı giriniz!");
       if (!m2fiyat) return alert("m² fiyatı giriniz!");
 
-      var stoklar = getData("stok");
-      stoklar.push({
+      var row = {
         id: Date.now(),
         model: model,
-        kategori: document.getElementById("stokKategori").value,
         m2fiyat: m2fiyat,
-        stok: parseFloat(document.getElementById("stokMiktar").value) || 0,
-        en: parseFloat(document.getElementById("stokEn").value) || 0,
-        not: document.getElementById("stokNot").value.trim()
-      });
-      setData("stok", stoklar);
-      stokListele();
+        not_text: document.getElementById("stokNot").value.trim()
+      };
 
-      document.getElementById("stokModel").value = "";
-      document.getElementById("stokM2Fiyat").value = "";
-      document.getElementById("stokMiktar").value = "";
-      document.getElementById("stokEn").value = "";
-      document.getElementById("stokNot").value = "";
-      alert("Model eklendi!");
+      sbInsert("stok", row).then(function() {
+        return sbGetAll("stok");
+      }).then(function() {
+        stokListele();
+        document.getElementById("stokModel").value = "";
+        document.getElementById("stokM2Fiyat").value = "";
+        document.getElementById("stokNot").value = "";
+        alert("Model eklendi!");
+      });
     }
 
     function stokSil(id) {
       if (!confirm("Bu modeli silmek istediğinize emin misiniz?")) return;
-      setData("stok", getData("stok").filter(function(s) { return s.id !== id; }));
-      stokListele();
+      sbDelete("stok", id).then(function() {
+        return sbGetAll("stok");
+      }).then(function() {
+        stokListele();
+      });
     }
 
     var stokEditId = null;
@@ -413,38 +548,28 @@
       if (!s) return;
       stokEditId = id;
       document.getElementById("stokModel").value = s.model;
-      document.getElementById("stokKategori").value = s.kategori || "Halı";
       document.getElementById("stokM2Fiyat").value = s.m2fiyat;
-      document.getElementById("stokMiktar").value = s.stok || "";
-      document.getElementById("stokEn").value = s.en || "";
-      document.getElementById("stokNot").value = s.not || "";
+      document.getElementById("stokNot").value = s.not_text || s.not || "";
 
       var btn = document.querySelector("#tab0 .btn-primary");
       btn.textContent = "💾 Güncelle";
       btn.onclick = function() {
-        var stoklar = getData("stok");
-        stoklar = stoklar.map(function(x) {
-          if (x.id !== stokEditId) return x;
-          return {
-            id: x.id,
-            model: document.getElementById("stokModel").value.trim(),
-            kategori: document.getElementById("stokKategori").value,
-            m2fiyat: parseFloat(document.getElementById("stokM2Fiyat").value) || 0,
-            stok: parseFloat(document.getElementById("stokMiktar").value) || 0,
-            en: parseFloat(document.getElementById("stokEn").value) || 0,
-            not: document.getElementById("stokNot").value.trim()
-          };
+        var updated = {
+          model: document.getElementById("stokModel").value.trim(),
+          m2fiyat: parseFloat(document.getElementById("stokM2Fiyat").value) || 0,
+          not_text: document.getElementById("stokNot").value.trim()
+        };
+        sbUpdate("stok", stokEditId, updated).then(function() {
+          return sbGetAll("stok");
+        }).then(function() {
+          stokListele();
+          stokEditId = null;
+          btn.textContent = "✅ Modeli Ekle";
+          btn.onclick = stokEkle;
+          document.getElementById("stokModel").value = "";
+          document.getElementById("stokM2Fiyat").value = "";
+          document.getElementById("stokNot").value = "";
         });
-        setData("stok", stoklar);
-        stokListele();
-        stokEditId = null;
-        btn.textContent = "✅ Modeli Ekle";
-        btn.onclick = stokEkle;
-        document.getElementById("stokModel").value = "";
-        document.getElementById("stokM2Fiyat").value = "";
-        document.getElementById("stokMiktar").value = "";
-        document.getElementById("stokEn").value = "";
-        document.getElementById("stokNot").value = "";
       };
     }
 
@@ -456,20 +581,15 @@
       }
       var tbody = document.getElementById("stokBody");
       if (stoklar.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#64748b;">Model bulunamadı</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#64748b;">Model bulunamadı</td></tr>';
         return;
       }
       var html = "";
       stoklar.forEach(function(s) {
-        var stockClass = s.stok > 10 ? "stock-ok" : s.stok > 0 ? "stock-low" : "stock-out";
-        var stockLabel = s.stok > 10 ? "Yeterli" : s.stok > 0 ? "Az" : "Yok";
         html += '<tr>'
           + '<td style="font-weight:600;color:#f1f5f9;">' + s.model + '</td>'
-          + '<td>' + (s.kategori || "Halı") + '</td>'
           + '<td style="color:#8b5cf6;font-weight:600;">' + formatTL(s.m2fiyat) + '</td>'
-          + '<td>' + (s.en ? s.en + " m" : "-") + '</td>'
-          + '<td><span class="stock-badge ' + stockClass + '">' + (s.stok || 0) + ' m² (' + stockLabel + ')</span></td>'
-          + '<td style="max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + (s.not||"") + '">' + (s.not || "-") + '</td>'
+          + '<td style="max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + (s.not_text||s.not||"") + '">' + (s.not_text || s.not || "-") + '</td>'
           + '<td class="no-print"><button class="btn btn-sm btn-edit" onclick="stokDuzenle(' + s.id + ')">Düzenle</button> <button class="btn btn-sm btn-danger" onclick="stokSil(' + s.id + ')">Sil</button></td>'
           + '</tr>';
       });
@@ -494,55 +614,130 @@
       list.innerHTML = filtered.map(function(s) {
         return '<div class="search-item" onclick="hesapModelSec(' + s.id + ')">'
           + '<div>' + s.model + '</div>'
-          + '<div class="search-item-sub">' + (s.kategori||"Halı") + ' | ' + formatTL(s.m2fiyat) + '/m²' + (s.en ? ' | En: ' + s.en + 'm' : '') + '</div>'
+          + '<div class="search-item-sub">' + formatTL(s.m2fiyat) + '/m²</div>'
           + '</div>';
       }).join("");
     }
+
+    var seciliModelMaliyet = 0;
 
     function hesapModelSec(id) {
       var s = getData("stok").find(function(x) { return x.id === id; });
       if (!s) return;
       seciliModelId = id;
+      seciliModelMaliyet = s.m2fiyat;
       document.getElementById("hesapModel").value = s.model;
-      document.getElementById("hesapM2Fiyat").value = s.m2fiyat;
       document.getElementById("hesapModelList").style.display = "none";
-      if (s.en) document.getElementById("hesapEn").value = s.en;
+      hesapM2FiyatGuncelle();
       hesapYap();
     }
 
+    function hesapM2FiyatGuncelle() {
+      if (!seciliModelMaliyet) return;
+      var satisFiyatM2 = seciliModelMaliyet * 2 * 1.10;
+      var modelTip = document.getElementById("hesapModelTip").value;
+      if (modelTip === "Oval" || modelTip === "Yuvarlak") {
+        satisFiyatM2 += 45;
+      }
+      document.getElementById("hesapM2Fiyat").value = satisFiyatM2.toFixed(2);
+    }
+
+    var TAKSIT_ORANLARI = { 4: 9.47, 5: 11.34, 6: 13.22, 7: 15.09, 8: 16.96, 9: 18.84 };
+
     function hesapYap() {
+      hesapM2FiyatGuncelle();
       var en = parseFloat(document.getElementById("hesapEn").value) || 0;
       var boy = parseFloat(document.getElementById("hesapBoy").value) || 0;
-      var fiyat = parseFloat(document.getElementById("hesapM2Fiyat").value) || 0;
+      var satisFiyatM2 = parseFloat(document.getElementById("hesapM2Fiyat").value) || 0;
       var adet = parseInt(document.getElementById("hesapAdet").value) || 1;
+      var taksit = parseInt(document.getElementById("hesapTaksit").value) || 0;
       var box = document.getElementById("hesapResult");
 
-      if (en > 0 && boy > 0 && fiyat > 0) {
+      if (en > 0 && boy > 0 && satisFiyatM2 > 0) {
         var m2 = en * boy;
         var totalM2 = m2 * adet;
-        var birim = m2 * fiyat;
-        var total = birim * adet;
+        var birimMaliyet = m2 * seciliModelMaliyet;
+        var totalMaliyet = birimMaliyet * adet;
+        var satisFiyat = totalM2 * satisFiyatM2;
         box.style.display = "flex";
         document.getElementById("hrModel").textContent = document.getElementById("hesapModel").value || "-";
         document.getElementById("hrM2").textContent = m2.toFixed(2) + " m\u00B2";
         document.getElementById("hrTotalM2").textContent = totalM2.toFixed(2) + " m\u00B2";
-        document.getElementById("hrBirim").textContent = formatTL(birim);
-        document.getElementById("hrTotal").textContent = formatTL(total);
-        var satisFiyat = total * 2 * 1.10;
+        document.getElementById("hrBirim").textContent = formatTL(birimMaliyet);
+        document.getElementById("hrTotal").textContent = formatTL(totalMaliyet);
         document.getElementById("hrSatis").textContent = formatTL(satisFiyat);
+
+        // Ödeme kutusu göster
+        document.getElementById("hesapOdemeBox").style.display = "block";
+
+        var taksitBox = document.getElementById("hrTaksitBox");
+        if (taksit > 0 && TAKSIT_ORANLARI[taksit]) {
+          var oran = TAKSIT_ORANLARI[taksit];
+          var taksitliFiyat = satisFiyat * (1 + oran / 100);
+          var aylikTaksit = taksitliFiyat / taksit;
+          taksitBox.style.display = "block";
+          document.getElementById("hrTaksitFiyat").textContent = formatTL(taksitliFiyat);
+          document.getElementById("hrTaksitDetay").textContent = taksit + " x " + formatTL(aylikTaksit) + " (%" + oran + " vade farkı)";
+        } else {
+          taksitBox.style.display = "none";
+        }
       } else {
         box.style.display = "none";
+        document.getElementById("hesapOdemeBox").style.display = "none";
       }
     }
 
     function hesapTemizle() {
       seciliModelId = null;
+      seciliModelMaliyet = 0;
       document.getElementById("hesapModel").value = "";
       document.getElementById("hesapM2Fiyat").value = "";
       document.getElementById("hesapEn").value = "";
       document.getElementById("hesapBoy").value = "";
       document.getElementById("hesapAdet").value = "1";
+      document.getElementById("hesapTaksit").value = "0";
+      document.getElementById("hesapModelTip").value = "Düz";
       document.getElementById("hesapResult").style.display = "none";
+      document.getElementById("hesapOdemeBox").style.display = "none";
+    }
+
+    // ═══════════ SİPARİŞ OLUŞTUR (Hesaplamadan) ═══════════
+    function siparisOlustur() {
+      var en = parseFloat(document.getElementById("hesapEn").value) || 0;
+      var boy = parseFloat(document.getElementById("hesapBoy").value) || 0;
+      var adet = parseInt(document.getElementById("hesapAdet").value) || 1;
+      var taksit = parseInt(document.getElementById("hesapTaksit").value) || 0;
+      var satisFiyatM2 = parseFloat(document.getElementById("hesapM2Fiyat").value) || 0;
+      var m2 = en * boy;
+      var totalM2 = m2 * adet;
+      var satisFiyat = totalM2 * satisFiyatM2;
+      var modelTip = document.getElementById("hesapModelTip").value;
+      var odeme = document.getElementById("hesapOdeme").value;
+
+      // Taksitli fiyat varsa onu kullan
+      var sonFiyat = satisFiyat;
+      if (taksit > 0 && TAKSIT_ORANLARI[taksit]) {
+        sonFiyat = satisFiyat * (1 + TAKSIT_ORANLARI[taksit] / 100);
+      }
+
+      // Siparişler sekmesine geç
+      switchTab(2);
+
+      // Formu doldur
+      document.getElementById("sipModel").value = document.getElementById("hesapModel").value;
+      document.getElementById("sipOlcu").value = en + "x" + boy;
+      document.getElementById("sipM2").value = totalM2.toFixed(2);
+      document.getElementById("sipFiyat").value = sonFiyat.toFixed(2);
+      document.getElementById("sipOdeme").value = odeme;
+      document.getElementById("sipKapora").value = "0";
+      document.getElementById("sipKalan").value = sonFiyat.toFixed(2);
+      var notText = modelTip;
+      if (taksit > 0) notText += " | " + taksit + " taksit";
+      if (adet > 1) notText += " | " + adet + " adet";
+      document.getElementById("sipNot").value = notText;
+
+      // Müşteri adı alanına fokusla
+      document.getElementById("sipMusteri").focus();
     }
 
     // ═══════════ SİPARİŞLER ═══════════
@@ -611,40 +806,41 @@
         kapora: kapora,
         kalan: fiyat - kapora,
         tarih: document.getElementById("sipTarih").value || todayStr(),
-        teslimTarih: document.getElementById("sipTeslimTarih").value || "",
+        teslim_tarih: document.getElementById("sipTeslimTarih").value || null,
         durum: document.getElementById("sipDurum").value,
-        not: document.getElementById("sipNot").value.trim()
+        not_text: document.getElementById("sipNot").value.trim()
       };
 
-      var siparisler = getData("siparis");
-      siparisler.unshift(sip);
-      setData("siparis", siparisler);
-      sipListele();
-
-      // Formu temizle
-      ["sipMusteri","sipTelefon","sipModel","sipOlcu","sipM2","sipFiyat","sipKalan","sipNot"].forEach(function(id) {
-        document.getElementById(id).value = "";
+      sbInsert("siparis", sip).then(function() {
+        return sbGetAll("siparis");
+      }).then(function() {
+        sipListele();
+        ["sipMusteri","sipTelefon","sipModel","sipOlcu","sipM2","sipFiyat","sipKalan","sipNot"].forEach(function(id) {
+          document.getElementById(id).value = "";
+        });
+        document.getElementById("sipKapora").value = "0";
+        document.getElementById("sipDurum").value = "bekliyor";
+        document.getElementById("sipTeslimTarih").value = "";
+        document.getElementById("sipTarih").value = todayStr();
+        alert("Sipariş kaydedildi!");
       });
-      document.getElementById("sipKapora").value = "0";
-      document.getElementById("sipDurum").value = "bekliyor";
-      document.getElementById("sipTeslimTarih").value = "";
-      document.getElementById("sipTarih").value = todayStr();
-      alert("Sipariş kaydedildi!");
     }
 
     function sipSil(id) {
       if (!confirm("Bu siparişi silmek istediğinize emin misiniz?")) return;
-      setData("siparis", getData("siparis").filter(function(s) { return s.id !== id; }));
-      sipListele();
+      sbDelete("siparis", id).then(function() {
+        return sbGetAll("siparis");
+      }).then(function() {
+        sipListele();
+      });
     }
 
     function sipDurumDegistir(id, yeniDurum) {
-      var siparisler = getData("siparis").map(function(s) {
-        if (s.id === id) s.durum = yeniDurum;
-        return s;
+      sbUpdate("siparis", id, { durum: yeniDurum }).then(function() {
+        return sbGetAll("siparis");
+      }).then(function() {
+        sipListele();
       });
-      setData("siparis", siparisler);
-      sipListele();
     }
 
     function sipListele() {
@@ -683,7 +879,7 @@
           + '<td style="color:#22c55e;font-weight:600;">' + formatTL(s.fiyat) + '</td>'
           + '<td style="color:#60a5fa;">' + formatTL(s.kapora) + '</td>'
           + '<td style="color:#f59e0b;font-weight:700;">' + formatTL(s.kalan) + '</td>'
-          + '<td>' + (s.teslimTarih || "-") + '</td>'
+          + '<td>' + (s.teslim_tarih || s.teslimTarih || "-") + '</td>'
           + '<td><span class="badge ' + (badgeClass[s.durum] || "badge-bekliyor") + '">' + (durumLabel[s.durum] || s.durum) + '</span></td>'
           + '<td class="no-print" style="white-space:nowrap;">'
           + (s.durum === "bekliyor" ? '<button class="btn btn-sm btn-success" style="margin-right:4px;" onclick="sipDurumDegistir(' + s.id + ',\'teslim\')">Teslim</button>' : '')
@@ -701,10 +897,12 @@
       }
     });
 
-    // Başlangıç
+    // Başlangıç - Supabase'den verileri yükle
     document.getElementById("sipTarih").value = todayStr();
-    stokListele();
-    sipListele();
+    Promise.all([sbGetAll("stok"), sbGetAll("siparis")]).then(function() {
+      stokListele();
+      sipListele();
+    });
   </script>
 
 </body>
