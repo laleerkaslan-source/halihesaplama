@@ -1,0 +1,16 @@
+name: Supabase Keep Alive
+
+on:
+  schedule:
+    - cron: '0 9 * * 1,4'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase
+        run: |
+          curl -s -o /dev/null -w "HTTP %{http_code}\n" \
+            "https://trrktuelkxuulyrhlewe.supabase.co/rest/v1/stok?select=id&limit=1" \
+            -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRycmt0dWVsa3h1dWx5cmhsZXdlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODE3OTksImV4cCI6MjA4OTg1Nzc5OX0.akF-t15r8APvxAIZZthDcLV_xIjyK7Tl9Ze1DzB2tD4"
