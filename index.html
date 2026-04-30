@@ -288,24 +288,33 @@
           </div>
         </div>
 
-        <div class="card" id="hesapOdemeBox" style="display:none; margin-top: 16px;">
-          <h3 class="card-title">💳 Ödeme Yöntemi</h3>
-          <div class="form-grid">
-            <div>
-              <label class="label">Ödeme</label>
-              <select class="input" id="hesapOdeme">
-                <option value="nakit">Nakit</option>
-                <option value="kredi_karti">Kredi Kartı</option>
-                <option value="havale">Havale/EFT</option>
-              </select>
-            </div>
-          </div>
-          <button class="btn btn-success" style="margin-top: 14px;" onclick="siparisOlustur()">📋 Sipariş Oluştur</button>
-        </div>
-
-        <div style="margin-top: 14px; display: flex; gap: 10px;">
+        <div style="margin-top: 14px; display: flex; gap: 10px; flex-wrap: wrap;" id="hesapActions">
           <button class="btn btn-primary" onclick="hesapTemizle()">🗑️ Temizle</button>
           <button class="btn btn-success" onclick="window.print()">🖨️ Yazdır</button>
+          <button class="btn" id="sepeteEkleBtn" onclick="sepeteEkle()" style="display:none; background:#1e3a5f; color:#60a5fa; font-weight:700;">🛒 Sepete Ekle</button>
+        </div>
+      </div>
+
+      <!-- ═══════════ SEPET ═══════════ -->
+      <div class="card" id="sepetCard" style="display:none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <h3 class="card-title" style="margin-bottom: 0;">🛒 Sepet</h3>
+          <button class="btn btn-sm btn-ghost" onclick="sepetiTemizle()">Sepeti Boşalt</button>
+        </div>
+        <div style="overflow-x: auto;">
+          <table>
+            <thead><tr>
+              <th>Model</th><th>Tip</th><th>Ölçü</th><th>m²</th><th>Adet</th><th>Toplam</th><th>Ödeme</th><th class="no-print"></th>
+            </tr></thead>
+            <tbody id="sepetBody"></tbody>
+          </table>
+        </div>
+        <div style="margin-top: 12px; padding: 14px; background: linear-gradient(135deg, #1e1040, #0f172a); border: 1px solid #4f46e5; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+          <div>
+            <div style="color:#94a3b8; font-size: 12px; text-transform: uppercase;">Sepet Toplamı</div>
+            <div id="sepetToplam" style="color:#22c55e; font-size: 24px; font-weight: 800;">₺0,00</div>
+          </div>
+          <button class="btn btn-success" onclick="sepetSiparisOlustur()" style="font-size: 15px; padding: 12px 24px;">📋 Toplu Sipariş Oluştur</button>
         </div>
       </div>
     </div>
@@ -314,6 +323,28 @@
     <div class="tab-content" id="tab2">
       <div class="card no-print">
         <h3 class="card-title">📋 Yeni Sipariş</h3>
+
+        <!-- ÜRÜNLER -->
+        <div style="margin-bottom: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <label class="label" style="margin-bottom:0;">Sipariş Ürünleri</label>
+            <button class="btn btn-sm" onclick="sipUrunEkleAc()" style="background:#1e3a5f; color:#60a5fa;">+ Ürün Ekle</button>
+          </div>
+          <div style="overflow-x: auto;">
+            <table>
+              <thead><tr>
+                <th>Model</th><th>Ölçü</th><th>m²</th><th>Adet</th><th>Tutar</th><th class="no-print"></th>
+              </tr></thead>
+              <tbody id="sipUrunlerBody"><tr><td colspan="6" style="text-align:center;color:#64748b; padding: 14px;">Henüz ürün eklenmedi</td></tr></tbody>
+            </table>
+          </div>
+          <div style="margin-top: 8px; padding: 10px 14px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; display: flex; justify-content: space-between;">
+            <span style="color:#94a3b8;">Ürünler Toplamı</span>
+            <span id="sipUrunlerToplam" style="color:#22c55e; font-weight: 800;">₺0,00</span>
+          </div>
+        </div>
+
+        <!-- MÜŞTERİ BİLGİLERİ -->
         <div class="form-grid">
           <div>
             <label class="label">Müşteri Adı</label>
@@ -322,31 +353,6 @@
           <div>
             <label class="label">Telefon</label>
             <input class="input" id="sipTelefon" placeholder="05xx xxx xx xx" />
-          </div>
-          <div class="search-box">
-            <label class="label">Halı Modeli</label>
-            <input class="input" id="sipModel" placeholder="🔍 Model ara..." oninput="sipModelAra()" onfocus="sipModelAra()" />
-            <div class="search-list" id="sipModelList" style="display:none;"></div>
-          </div>
-          <div>
-            <label class="label">Ölçü (En × Boy)</label>
-            <input class="input" id="sipOlcu" placeholder="örn: 3x4.5" />
-          </div>
-          <div>
-            <label class="label">m²</label>
-            <input class="input" type="number" step="0.01" id="sipM2" placeholder="Otomatik" />
-          </div>
-          <div>
-            <label class="label">Satış Fiyatı (₺)</label>
-            <input class="input" type="number" step="0.01" id="sipFiyat" placeholder="Toplam fiyat" />
-          </div>
-          <div>
-            <label class="label">Kapora (₺)</label>
-            <input class="input" type="number" step="0.01" id="sipKapora" value="0" oninput="sipKalanHesapla()" />
-          </div>
-          <div>
-            <label class="label">Kalan Tutar (₺)</label>
-            <input class="input" type="number" id="sipKalan" readonly style="background:#0f172a; color:#f59e0b; font-weight:700;" />
           </div>
           <div>
             <label class="label">Sipariş Tarihi</label>
@@ -357,14 +363,6 @@
             <input class="input" type="date" id="sipTeslimTarih" />
           </div>
           <div>
-            <label class="label">Ödeme Yöntemi</label>
-            <select class="input" id="sipOdeme">
-              <option value="nakit">Nakit</option>
-              <option value="kredi_karti">Kredi Kartı</option>
-              <option value="havale">Havale/EFT</option>
-            </select>
-          </div>
-          <div>
             <label class="label">Durum</label>
             <select class="input" id="sipDurum">
               <option value="bekliyor">Bekliyor</option>
@@ -372,12 +370,69 @@
               <option value="iptal">İptal</option>
             </select>
           </div>
-          <div>
+          <div style="grid-column: 1 / -1;">
             <label class="label">Not</label>
             <input class="input" id="sipNot" placeholder="Adres, detay vb." />
           </div>
         </div>
-        <button class="btn btn-primary" style="margin-top: 14px;" onclick="sipKaydet()">✅ Siparişi Kaydet</button>
+
+        <!-- ÖDEME (BÖLÜNMÜŞ) -->
+        <div style="margin-top: 16px; padding: 14px; background: #1a0d2e; border: 1px solid #a855f7; border-radius: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <span style="color:#a78bfa; font-weight: 700;">💳 Ödeme Yöntemleri</span>
+            <button class="btn btn-sm" onclick="sipOdemeEkle()" style="background:#1e293b; border:1px solid #475569; color:#a78bfa;">+ Yöntem Ekle</button>
+          </div>
+          <div id="sipOdemelerBody"></div>
+          <div style="display: flex; justify-content: space-between; margin-top: 10px; padding-top: 10px; border-top: 1px solid #334155;">
+            <span style="color:#94a3b8; font-size: 13px;">Ödeme Toplamı: <span id="sipOdemeToplam" style="color:#f1f5f9; font-weight: 700;">₺0,00</span></span>
+            <span id="sipOdemeFark" style="font-size: 13px; font-weight: 700;"></span>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-top: 6px;">
+            <span style="color:#94a3b8; font-size: 13px;">Kapora: <span id="sipKaporaOzet" style="color:#60a5fa; font-weight: 700;">₺0,00</span></span>
+            <span style="color:#94a3b8; font-size: 13px;">Kalan: <span id="sipKalanOzet" style="color:#f59e0b; font-weight: 700;">₺0,00</span></span>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" style="margin-top: 14px; width: 100%; padding: 12px;" onclick="sipKaydet()">✅ Siparişi Kaydet</button>
+      </div>
+
+      <!-- ÜRÜN EKLE MODAL -->
+      <div id="sipUrunModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7); z-index:1000; align-items:center; justify-content:center; padding:16px;">
+        <div style="background:#0f172a; border:1px solid #334155; border-radius:14px; padding:20px; max-width:520px; width:100%;">
+          <h3 style="color:#f1f5f9; margin-bottom: 14px;">Ürün Ekle</h3>
+          <div class="form-grid">
+            <div class="search-box" style="grid-column: 1 / -1;">
+              <label class="label">Halı Modeli</label>
+              <input class="input" id="sipUrunModel" placeholder="🔍 Model ara..." oninput="sipUrunModelAra()" onfocus="sipUrunModelAra()" />
+              <div class="search-list" id="sipUrunModelList" style="display:none;"></div>
+            </div>
+            <div>
+              <label class="label">Tip</label>
+              <select class="input" id="sipUrunTip">
+                <option value="Düz">Düz</option>
+                <option value="Oval">Oval</option>
+                <option value="Yuvarlak">Yuvarlak</option>
+                <option value="Diğer">Diğer</option>
+              </select>
+            </div>
+            <div>
+              <label class="label">Ölçü (En × Boy)</label>
+              <input class="input" id="sipUrunOlcu" placeholder="örn: 3x4.5" />
+            </div>
+            <div>
+              <label class="label">Adet</label>
+              <input class="input" type="number" id="sipUrunAdet" value="1" min="1" />
+            </div>
+            <div>
+              <label class="label">Tutar (₺)</label>
+              <input class="input" type="number" step="0.01" id="sipUrunTutar" placeholder="Toplam fiyat" />
+            </div>
+          </div>
+          <div style="display:flex; gap:8px; margin-top:14px; justify-content:flex-end;">
+            <button class="btn btn-ghost" onclick="sipUrunModalKapat()">İptal</button>
+            <button class="btn btn-primary" onclick="sipUrunEkleKaydet()">Ekle</button>
+          </div>
+        </div>
       </div>
 
       <div class="card">
@@ -396,9 +451,9 @@
         <div style="overflow-x: auto;">
           <table>
             <thead><tr>
-              <th>Tarih</th><th>Müşteri</th><th>Tel</th><th>Model</th><th>Ölçü</th><th>m²</th><th>Fiyat</th><th>Kapora</th><th>Kalan</th><th>Teslim</th><th>Durum</th><th class="no-print"></th>
+              <th>Tarih</th><th>Müşteri</th><th>Tel</th><th>Ürünler</th><th>Toplam</th><th>Ödeme</th><th>Kapora</th><th>Kalan</th><th>Teslim</th><th>Durum</th><th class="no-print"></th>
             </tr></thead>
-            <tbody id="sipBody"><tr><td colspan="12" style="text-align:center;color:#64748b;">Henüz sipariş yok</td></tr></tbody>
+            <tbody id="sipBody"><tr><td colspan="11" style="text-align:center;color:#64748b;">Henüz sipariş yok</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -667,8 +722,8 @@
         document.getElementById("hrTotal").textContent = formatTL(totalMaliyet);
         document.getElementById("hrSatis").textContent = formatTL(satisFiyat);
 
-        // Ödeme kutusu göster
-        document.getElementById("hesapOdemeBox").style.display = "block";
+        // Sepete ekle butonunu göster
+        document.getElementById("sepeteEkleBtn").style.display = "inline-block";
 
         var taksitBox = document.getElementById("hrTaksitBox");
         if (taksit > 0 && TAKSIT_ORANLARI[taksit]) {
@@ -683,7 +738,7 @@
         }
       } else {
         box.style.display = "none";
-        document.getElementById("hesapOdemeBox").style.display = "none";
+        document.getElementById("sepeteEkleBtn").style.display = "none";
       }
     }
 
@@ -698,127 +753,363 @@
       document.getElementById("hesapTaksit").value = "0";
       document.getElementById("hesapModelTip").value = "Düz";
       document.getElementById("hesapResult").style.display = "none";
-      document.getElementById("hesapOdemeBox").style.display = "none";
+      document.getElementById("sepeteEkleBtn").style.display = "none";
     }
 
-    // ═══════════ SİPARİŞ OLUŞTUR (Hesaplamadan) ═══════════
-    function siparisOlustur() {
+    // ═══════════ SEPET ═══════════
+    var sepet = [];
+    var ODEME_YONTEMLERI = [
+      { value: "nakit",   label: "💵 Nakit" },
+      { value: "kk",      label: "💳 Kredi Kartı" },
+      { value: "taksit",  label: "📆 Taksit" },
+      { value: "havale",  label: "🏦 Havale/EFT" }
+    ];
+
+    function odemeLabel(v) {
+      var p = ODEME_YONTEMLERI.find(function(x) { return x.value === v; });
+      return p ? p.label : v;
+    }
+
+    function sepeteEkle() {
       var en = parseFloat(document.getElementById("hesapEn").value) || 0;
       var boy = parseFloat(document.getElementById("hesapBoy").value) || 0;
       var adet = parseInt(document.getElementById("hesapAdet").value) || 1;
       var taksit = parseInt(document.getElementById("hesapTaksit").value) || 0;
       var satisFiyatM2 = parseFloat(document.getElementById("hesapM2Fiyat").value) || 0;
+      var modelAd = document.getElementById("hesapModel").value.trim();
+      var modelTip = document.getElementById("hesapModelTip").value;
       var m2 = en * boy;
       var totalM2 = m2 * adet;
       var satisFiyat = totalM2 * satisFiyatM2;
-      var modelTip = document.getElementById("hesapModelTip").value;
-      var odeme = document.getElementById("hesapOdeme").value;
-
-      // Taksitli fiyat varsa onu kullan
       var sonFiyat = satisFiyat;
+      var taksitOran = 0;
       if (taksit > 0 && TAKSIT_ORANLARI[taksit]) {
-        sonFiyat = satisFiyat * (1 + TAKSIT_ORANLARI[taksit] / 100);
+        taksitOran = TAKSIT_ORANLARI[taksit];
+        sonFiyat = satisFiyat * (1 + taksitOran / 100);
       }
+      if (!modelAd || !en || !boy || !satisFiyatM2) {
+        return alert("Lütfen önce halı modelini ve ölçüleri girin.");
+      }
+      sepet.push({
+        tempId: Date.now() + Math.random(),
+        model: modelAd,
+        modelTip: modelTip,
+        en: en,
+        boy: boy,
+        adet: adet,
+        m2: m2,
+        totalM2: totalM2,
+        m2fiyat: satisFiyatM2,
+        taksit: taksit,
+        taksitOran: taksitOran,
+        tutar: sonFiyat
+      });
+      sepetGoster();
+      hesapTemizle();
+    }
 
-      // Siparişler sekmesine geç
+    function sepettenSil(tempId) {
+      sepet = sepet.filter(function(x) { return x.tempId !== tempId; });
+      sepetGoster();
+    }
+
+    function sepetiTemizle() {
+      if (sepet.length === 0) return;
+      if (!confirm("Sepeti boşaltmak istiyor musunuz?")) return;
+      sepet = [];
+      sepetGoster();
+    }
+
+    function sepetGoster() {
+      var card = document.getElementById("sepetCard");
+      var body = document.getElementById("sepetBody");
+      var totalEl = document.getElementById("sepetToplam");
+      if (sepet.length === 0) {
+        card.style.display = "none";
+        return;
+      }
+      card.style.display = "block";
+      var toplam = 0;
+      var html = "";
+      sepet.forEach(function(item) {
+        toplam += item.tutar;
+        var odemeText = item.taksit > 0 ? (item.taksit + " taksit (%" + item.taksitOran + ")") : "Peşin";
+        html += '<tr>'
+          + '<td style="font-weight:600;color:#f1f5f9;">' + item.model + '</td>'
+          + '<td>' + item.modelTip + '</td>'
+          + '<td>' + item.en + 'x' + item.boy + '</td>'
+          + '<td>' + item.totalM2.toFixed(2) + '</td>'
+          + '<td>' + item.adet + '</td>'
+          + '<td style="color:#22c55e;font-weight:700;">' + formatTL(item.tutar) + '</td>'
+          + '<td style="color:#a78bfa;font-size:12px;">' + odemeText + '</td>'
+          + '<td class="no-print"><button class="btn btn-sm btn-danger" onclick="sepettenSil(' + item.tempId + ')">Sil</button></td>'
+          + '</tr>';
+      });
+      body.innerHTML = html;
+      totalEl.textContent = formatTL(toplam);
+    }
+
+    function sepetSiparisOlustur() {
+      if (sepet.length === 0) return alert("Sepet boş!");
+      // Sepetteki ürünleri sipariş ürünlerine aktar
+      sipUrunler = sepet.map(function(item) {
+        return {
+          id: item.tempId,
+          model: item.model,
+          modelTip: item.modelTip,
+          olcu: item.en + "x" + item.boy,
+          m2: item.totalM2,
+          adet: item.adet,
+          tutar: item.tutar,
+          taksit: item.taksit
+        };
+      });
+      sepet = [];
+      sepetGoster();
+      // Bölünmüş ödeme defaultu: tek satır, toplam tutar nakit
+      var toplam = sipUrunler.reduce(function(a, x) { return a + x.tutar; }, 0);
+      sipOdemeler = [{ method: "nakit", amount: toplam }];
       switchTab(2);
-
-      // Formu doldur
-      document.getElementById("sipModel").value = document.getElementById("hesapModel").value;
-      document.getElementById("sipOlcu").value = en + "x" + boy;
-      document.getElementById("sipM2").value = totalM2.toFixed(2);
-      document.getElementById("sipFiyat").value = sonFiyat.toFixed(2);
-      document.getElementById("sipOdeme").value = odeme;
-      document.getElementById("sipKapora").value = "0";
-      document.getElementById("sipKalan").value = sonFiyat.toFixed(2);
-      var notText = modelTip;
-      if (taksit > 0) notText += " | " + taksit + " taksit";
-      if (adet > 1) notText += " | " + adet + " adet";
-      document.getElementById("sipNot").value = notText;
-
-      // Müşteri adı alanına fokusla
+      sipUrunleriGoster();
+      sipOdemeleriGoster();
       document.getElementById("sipMusteri").focus();
     }
 
-    // ═══════════ SİPARİŞLER ═══════════
-    var sipSeciliModel = "";
+    // ═══════════ SİPARİŞ ÜRÜNLERİ ═══════════
+    var sipUrunler = [];
+    var sipUrunModelSecili = "";
 
-    function sipModelAra() {
-      var val = document.getElementById("sipModel").value.toLocaleLowerCase("tr");
+    function sipUrunModelAra() {
+      var val = document.getElementById("sipUrunModel").value.toLocaleLowerCase("tr");
       var stoklar = getData("stok");
-      var list = document.getElementById("sipModelList");
+      var list = document.getElementById("sipUrunModelList");
       var filtered = stoklar.filter(function(s) {
         return s.model.toLocaleLowerCase("tr").indexOf(val) !== -1;
       });
       if (filtered.length === 0) { list.style.display = "none"; return; }
       list.style.display = "block";
       list.innerHTML = filtered.map(function(s) {
-        return '<div class="search-item" onclick="sipModelSec(\'' + s.model.replace(/'/g, "\\'") + '\')">'
+        return '<div class="search-item" onclick="sipUrunModelSec(\'' + s.model.replace(/'/g, "\\'") + '\')">'
           + '<div>' + s.model + '</div>'
           + '<div class="search-item-sub">' + formatTL(s.m2fiyat) + '/m²</div>'
           + '</div>';
       }).join("");
     }
 
-    function sipModelSec(model) {
-      sipSeciliModel = model;
-      document.getElementById("sipModel").value = model;
-      document.getElementById("sipModelList").style.display = "none";
+    function sipUrunModelSec(model) {
+      sipUrunModelSecili = model;
+      document.getElementById("sipUrunModel").value = model;
+      document.getElementById("sipUrunModelList").style.display = "none";
     }
 
-    function sipKalanHesapla() {
-      var fiyat = parseFloat(document.getElementById("sipFiyat").value) || 0;
-      var kapora = parseFloat(document.getElementById("sipKapora").value) || 0;
-      document.getElementById("sipKalan").value = (fiyat - kapora).toFixed(2);
+    function sipUrunEkleAc() {
+      ["sipUrunModel","sipUrunOlcu","sipUrunTutar"].forEach(function(id) { document.getElementById(id).value = ""; });
+      document.getElementById("sipUrunAdet").value = "1";
+      document.getElementById("sipUrunTip").value = "Düz";
+      document.getElementById("sipUrunModal").style.display = "flex";
     }
 
-    // Ölçü alanından m² otomatik hesapla
-    document.getElementById("sipOlcu").addEventListener("input", function() {
-      var val = this.value.replace(/\s/g, "").replace(",", ".");
-      var parts = val.split("x");
-      if (parts.length === 2) {
-        var en = parseFloat(parts[0]);
-        var boy = parseFloat(parts[1]);
-        if (en > 0 && boy > 0) {
-          document.getElementById("sipM2").value = (en * boy).toFixed(2);
-        }
+    function sipUrunModalKapat() {
+      document.getElementById("sipUrunModal").style.display = "none";
+    }
+
+    function sipUrunEkleKaydet() {
+      var model = document.getElementById("sipUrunModel").value.trim();
+      var olcu = document.getElementById("sipUrunOlcu").value.trim();
+      var adet = parseInt(document.getElementById("sipUrunAdet").value) || 1;
+      var tutar = parseFloat(document.getElementById("sipUrunTutar").value) || 0;
+      if (!model) return alert("Model giriniz!");
+      if (!tutar) return alert("Tutar giriniz!");
+      var m2 = 0;
+      var olcuParts = olcu.replace(/\s/g, "").replace(",", ".").split("x");
+      if (olcuParts.length === 2) {
+        var en = parseFloat(olcuParts[0]);
+        var boy = parseFloat(olcuParts[1]);
+        if (en > 0 && boy > 0) m2 = en * boy * adet;
       }
-    });
+      sipUrunler.push({
+        id: Date.now(),
+        model: model,
+        modelTip: document.getElementById("sipUrunTip").value,
+        olcu: olcu,
+        m2: m2,
+        adet: adet,
+        tutar: tutar,
+        taksit: 0
+      });
+      sipUrunleriGoster();
+      // Ödeme toplamını otomatik güncelle (tek satır varsa)
+      if (sipOdemeler.length === 1) {
+        sipOdemeler[0].amount = sipUrunler.reduce(function(a, x) { return a + x.tutar; }, 0);
+        sipOdemeleriGoster();
+      } else {
+        sipOdemeOzetGuncelle();
+      }
+      sipUrunModalKapat();
+    }
 
-    document.getElementById("sipFiyat").addEventListener("input", sipKalanHesapla);
+    function sipUrunSil(id) {
+      sipUrunler = sipUrunler.filter(function(x) { return x.id !== id; });
+      sipUrunleriGoster();
+      sipOdemeOzetGuncelle();
+    }
+
+    function sipUrunleriGoster() {
+      var body = document.getElementById("sipUrunlerBody");
+      var totalEl = document.getElementById("sipUrunlerToplam");
+      if (sipUrunler.length === 0) {
+        body.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#64748b; padding: 14px;">Henüz ürün eklenmedi</td></tr>';
+        totalEl.textContent = formatTL(0);
+        sipOdemeOzetGuncelle();
+        return;
+      }
+      var toplam = 0;
+      var html = "";
+      sipUrunler.forEach(function(u) {
+        toplam += u.tutar;
+        html += '<tr>'
+          + '<td style="font-weight:600;color:#f1f5f9;">' + u.model + (u.modelTip ? ' <span style="color:#94a3b8;font-size:11px;">(' + u.modelTip + ')</span>' : '') + '</td>'
+          + '<td>' + (u.olcu || "-") + '</td>'
+          + '<td>' + (u.m2 ? u.m2.toFixed(2) : "-") + '</td>'
+          + '<td>' + u.adet + '</td>'
+          + '<td style="color:#22c55e;font-weight:700;">' + formatTL(u.tutar) + '</td>'
+          + '<td class="no-print"><button class="btn btn-sm btn-danger" onclick="sipUrunSil(' + u.id + ')">Sil</button></td>'
+          + '</tr>';
+      });
+      body.innerHTML = html;
+      totalEl.textContent = formatTL(toplam);
+      sipOdemeOzetGuncelle();
+    }
+
+    // ═══════════ BÖLÜNMÜŞ ÖDEME ═══════════
+    var sipOdemeler = [{ method: "nakit", amount: 0 }];
+
+    function sipOdemeEkle() {
+      sipOdemeler.push({ method: "nakit", amount: 0 });
+      sipOdemeleriGoster();
+    }
+
+    function sipOdemeSil(idx) {
+      if (sipOdemeler.length <= 1) return alert("En az bir ödeme satırı olmalı.");
+      sipOdemeler.splice(idx, 1);
+      sipOdemeleriGoster();
+    }
+
+    function sipOdemeMethodDegistir(idx, val) {
+      sipOdemeler[idx].method = val;
+      // Taksit seçildiyse ek alan göster
+      sipOdemeleriGoster();
+    }
+
+    function sipOdemeAmountDegistir(idx, val) {
+      sipOdemeler[idx].amount = parseFloat(val) || 0;
+      sipOdemeOzetGuncelle();
+    }
+
+    function sipOdemeTaksitDegistir(idx, val) {
+      sipOdemeler[idx].taksit = parseInt(val) || 0;
+    }
+
+    function sipOdemeleriGoster() {
+      var body = document.getElementById("sipOdemelerBody");
+      var html = "";
+      sipOdemeler.forEach(function(p, idx) {
+        html += '<div style="display:flex; gap:8px; margin-bottom:8px; align-items:center; flex-wrap:wrap;">'
+          + '<select class="input" style="flex:0 0 160px;" onchange="sipOdemeMethodDegistir(' + idx + ', this.value)">';
+        ODEME_YONTEMLERI.forEach(function(o) {
+          html += '<option value="' + o.value + '"' + (p.method === o.value ? ' selected' : '') + '>' + o.label + '</option>';
+        });
+        html += '</select>'
+          + '<input class="input" type="number" step="0.01" placeholder="Tutar (₺)" value="' + (p.amount || "") + '" oninput="sipOdemeAmountDegistir(' + idx + ', this.value)" style="flex:1; min-width:120px;" />';
+        if (p.method === "taksit") {
+          html += '<select class="input" style="flex:0 0 110px;" onchange="sipOdemeTaksitDegistir(' + idx + ', this.value)">';
+          [0,2,3,4,5,6,7,8,9].forEach(function(t) {
+            html += '<option value="' + t + '"' + ((p.taksit || 0) === t ? ' selected' : '') + '>' + (t === 0 ? "Taksit yok" : (t + " taksit")) + '</option>';
+          });
+          html += '</select>';
+        }
+        html += '<button class="btn btn-sm btn-danger" onclick="sipOdemeSil(' + idx + ')">✕</button>'
+          + '</div>';
+      });
+      body.innerHTML = html;
+      sipOdemeOzetGuncelle();
+    }
+
+    function sipOdemeOzetGuncelle() {
+      var urunlerToplam = sipUrunler.reduce(function(a, x) { return a + x.tutar; }, 0);
+      var odemeToplam = sipOdemeler.reduce(function(a, x) { return a + (parseFloat(x.amount) || 0); }, 0);
+      var fark = urunlerToplam - odemeToplam;
+      // Kapora: nakit/havale ödemelerin toplamı (peşin alındı kabul edilir)
+      var kapora = sipOdemeler.reduce(function(a, x) {
+        return a + ((x.method === "nakit" || x.method === "havale") ? (parseFloat(x.amount) || 0) : 0);
+      }, 0);
+      document.getElementById("sipOdemeToplam").textContent = formatTL(odemeToplam);
+      var farkEl = document.getElementById("sipOdemeFark");
+      if (Math.abs(fark) < 0.01 && urunlerToplam > 0) {
+        farkEl.innerHTML = '<span style="color:#22c55e;">✓ Eşit</span>';
+      } else if (urunlerToplam > 0) {
+        farkEl.innerHTML = '<span style="color:#ef4444;">Fark: ' + formatTL(Math.abs(fark)) + '</span>';
+      } else {
+        farkEl.innerHTML = '';
+      }
+      document.getElementById("sipKaporaOzet").textContent = formatTL(kapora);
+      document.getElementById("sipKalanOzet").textContent = formatTL(urunlerToplam - kapora);
+    }
 
     function sipKaydet() {
       var musteri = document.getElementById("sipMusteri").value.trim();
       if (!musteri) return alert("Müşteri adı giriniz!");
-      var fiyat = parseFloat(document.getElementById("sipFiyat").value);
-      if (!fiyat) return alert("Satış fiyatı giriniz!");
+      if (sipUrunler.length === 0) return alert("En az bir ürün ekleyiniz!");
 
-      var kapora = parseFloat(document.getElementById("sipKapora").value) || 0;
+      var urunlerToplam = sipUrunler.reduce(function(a, x) { return a + x.tutar; }, 0);
+      var odemeler = sipOdemeler.filter(function(x) { return (parseFloat(x.amount) || 0) > 0; });
+      if (odemeler.length === 0) return alert("Ödeme tutarı giriniz!");
+      var odemeToplam = odemeler.reduce(function(a, x) { return a + (parseFloat(x.amount) || 0); }, 0);
+      if (Math.abs(urunlerToplam - odemeToplam) >= 0.01) {
+        return alert("Ödeme toplamı (" + formatTL(odemeToplam) + ") sipariş tutarına (" + formatTL(urunlerToplam) + ") eşit olmalı!");
+      }
 
+      var kapora = odemeler.reduce(function(a, x) {
+        return a + ((x.method === "nakit" || x.method === "havale") ? (parseFloat(x.amount) || 0) : 0);
+      }, 0);
+
+      // Geriye uyumluluk: ilk ürünün bilgilerini eski alanlara da yaz
+      var ilk = sipUrunler[0] || {};
       var sip = {
         id: Date.now(),
         musteri: musteri,
         telefon: document.getElementById("sipTelefon").value.trim(),
-        model: document.getElementById("sipModel").value.trim(),
-        olcu: document.getElementById("sipOlcu").value.trim(),
-        m2: parseFloat(document.getElementById("sipM2").value) || 0,
-        fiyat: fiyat,
+        model: sipUrunler.map(function(u) { return u.model; }).join(" + "),
+        olcu: ilk.olcu || "",
+        m2: sipUrunler.reduce(function(a, x) { return a + (x.m2 || 0); }, 0),
+        fiyat: urunlerToplam,
         kapora: kapora,
-        kalan: fiyat - kapora,
+        kalan: urunlerToplam - kapora,
         tarih: document.getElementById("sipTarih").value || todayStr(),
         teslim_tarih: document.getElementById("sipTeslimTarih").value || null,
         durum: document.getElementById("sipDurum").value,
-        not_text: document.getElementById("sipNot").value.trim()
+        not_text: document.getElementById("sipNot").value.trim(),
+        items: sipUrunler.map(function(u) {
+          return { model: u.model, modelTip: u.modelTip || "", olcu: u.olcu || "", m2: u.m2 || 0, adet: u.adet || 1, tutar: u.tutar };
+        }),
+        payments: odemeler.map(function(p) {
+          var o = { method: p.method, amount: parseFloat(p.amount) || 0 };
+          if (p.method === "taksit" && p.taksit) o.taksit = p.taksit;
+          return o;
+        })
       };
 
       sbInsert("siparis", sip).then(function() {
         return sbGetAll("siparis");
       }).then(function() {
         sipListele();
-        ["sipMusteri","sipTelefon","sipModel","sipOlcu","sipM2","sipFiyat","sipKalan","sipNot"].forEach(function(id) {
+        sipUrunler = [];
+        sipOdemeler = [{ method: "nakit", amount: 0 }];
+        sipUrunleriGoster();
+        sipOdemeleriGoster();
+        ["sipMusteri","sipTelefon","sipNot"].forEach(function(id) {
           document.getElementById(id).value = "";
         });
-        document.getElementById("sipKapora").value = "0";
         document.getElementById("sipDurum").value = "bekliyor";
         document.getElementById("sipTeslimTarih").value = "";
         document.getElementById("sipTarih").value = todayStr();
@@ -860,7 +1151,7 @@
 
       var tbody = document.getElementById("sipBody");
       if (siparisler.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="12" style="text-align:center;color:#64748b;">Sipariş bulunamadı</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;color:#64748b;">Sipariş bulunamadı</td></tr>';
         return;
       }
 
@@ -869,14 +1160,34 @@
 
       var html = "";
       siparisler.forEach(function(s) {
+        var urunlerHtml;
+        var items = Array.isArray(s.items) && s.items.length > 0 ? s.items : null;
+        if (items) {
+          urunlerHtml = items.map(function(it) {
+            return '<div style="font-size:12px;">' + it.model + (it.olcu ? ' <span style="color:#94a3b8;">' + it.olcu + '</span>' : '') + ' — <span style="color:#22c55e;">' + formatTL(it.tutar) + '</span></div>';
+          }).join("");
+        } else {
+          urunlerHtml = '<div style="font-size:13px;">' + (s.model || "-") + (s.olcu ? ' <span style="color:#94a3b8;">' + s.olcu + '</span>' : '') + '</div>';
+        }
+
+        var odemeHtml;
+        var pays = Array.isArray(s.payments) && s.payments.length > 0 ? s.payments : null;
+        if (pays) {
+          odemeHtml = pays.map(function(p) {
+            var taksitText = (p.method === "taksit" && p.taksit) ? (" " + p.taksit + "x") : "";
+            return '<div style="font-size:11px;">' + odemeLabel(p.method) + taksitText + ': ' + formatTL(p.amount) + '</div>';
+          }).join("");
+        } else {
+          odemeHtml = '<span style="color:#94a3b8; font-size:12px;">—</span>';
+        }
+
         html += '<tr>'
           + '<td>' + (s.tarih || "-") + '</td>'
           + '<td style="font-weight:600;color:#f1f5f9;">' + s.musteri + '</td>'
           + '<td>' + (s.telefon || "-") + '</td>'
-          + '<td>' + (s.model || "-") + '</td>'
-          + '<td>' + (s.olcu || "-") + '</td>'
-          + '<td>' + (s.m2 ? s.m2.toFixed(2) : "-") + '</td>'
-          + '<td style="color:#22c55e;font-weight:600;">' + formatTL(s.fiyat) + '</td>'
+          + '<td>' + urunlerHtml + '</td>'
+          + '<td style="color:#22c55e;font-weight:700;">' + formatTL(s.fiyat) + '</td>'
+          + '<td>' + odemeHtml + '</td>'
           + '<td style="color:#60a5fa;">' + formatTL(s.kapora) + '</td>'
           + '<td style="color:#f59e0b;font-weight:700;">' + formatTL(s.kalan) + '</td>'
           + '<td>' + (s.teslim_tarih || s.teslimTarih || "-") + '</td>'
@@ -892,13 +1203,15 @@
     // Dışına tıkla kapat
     document.addEventListener("click", function(e) {
       if (!e.target.closest(".search-box")) {
-        document.getElementById("hesapModelList").style.display = "none";
-        document.getElementById("sipModelList").style.display = "none";
+        var hl = document.getElementById("hesapModelList"); if (hl) hl.style.display = "none";
+        var ul = document.getElementById("sipUrunModelList"); if (ul) ul.style.display = "none";
       }
     });
 
     // Başlangıç - Supabase'den verileri yükle
     document.getElementById("sipTarih").value = todayStr();
+    sipUrunleriGoster();
+    sipOdemeleriGoster();
     Promise.all([sbGetAll("stok"), sbGetAll("siparis")]).then(function() {
       stokListele();
       sipListele();
