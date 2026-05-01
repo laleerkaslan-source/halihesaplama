@@ -408,26 +408,27 @@
             </div>
             <div>
               <label class="label">Tip</label>
-              <select class="input" id="sipUrunTip">
+              <select class="input" id="sipUrunTip" onchange="sipUrunTutarHesapla()">
                 <option value="Düz">Düz</option>
-                <option value="Oval">Oval</option>
-                <option value="Yuvarlak">Yuvarlak</option>
+                <option value="Oval">Oval (+₺45/m²)</option>
+                <option value="Yuvarlak">Yuvarlak (+₺45/m²)</option>
                 <option value="Diğer">Diğer</option>
               </select>
             </div>
             <div>
               <label class="label">Ölçü (En × Boy)</label>
-              <input class="input" id="sipUrunOlcu" placeholder="örn: 3x4.5" />
+              <input class="input" id="sipUrunOlcu" placeholder="örn: 3x4.5" oninput="sipUrunTutarHesapla()" />
             </div>
             <div>
               <label class="label">Adet</label>
-              <input class="input" type="number" id="sipUrunAdet" value="1" min="1" />
+              <input class="input" type="number" id="sipUrunAdet" value="1" min="1" oninput="sipUrunTutarHesapla()" />
             </div>
             <div>
-              <label class="label">Tutar (₺)</label>
-              <input class="input" type="number" step="0.01" id="sipUrunTutar" placeholder="Toplam fiyat" />
+              <label class="label">Tutar (₺) <span style="color:#64748b; font-size:11px;">otomatik</span></label>
+              <input class="input" type="number" step="0.01" id="sipUrunTutar" readonly style="background:#0f172a; color:#22c55e; font-weight:700;" />
             </div>
           </div>
+          <div id="sipUrunBilgi" style="margin-top:10px; font-size:12px; color:#94a3b8; display:none;"></div>
           <div style="display:flex; gap:8px; margin-top:14px; justify-content:flex-end;">
             <button class="btn btn-ghost" onclick="sipUrunModalKapat()">İptal</button>
             <button class="btn btn-primary" onclick="sipUrunEkleKaydet()">Ekle</button>
@@ -896,16 +897,26 @@
       }).join("");
     }
 
+    var sipUrunModelMaliyet = 0; // seçilen modelin m² maliyet fiyatı
+
     function sipUrunModelSec(model) {
       sipUrunModelSecili = model;
       document.getElementById("sipUrunModel").value = model;
       document.getElementById("sipUrunModelList").style.display = "none";
+      // Maliyet fiyatını yakala — fiyat hesaplaması bunun üzerinden yapılacak
+      var stoklar = getData("stok");
+      var s = stoklar.find(function(x) { return x.model === model; });
+      sipUrunModelMaliyet = s ? (s.m2fiyat || 0) : 0;
+      sipUrunTutarHesapla();
     }
 
     function sipUrunEkleAc() {
       ["sipUrunModel","sipUrunOlcu","sipUrunTutar"].forEach(function(id) { document.getElementById(id).value = ""; });
       document.getElementById("sipUrunAdet").value = "1";
       document.getElementById("sipUrunTip").value = "Düz";
+      document.getElementById("sipUrunBilgi").style.display = "none";
+      sipUrunModelSecili = "";
+      sipUrunModelMaliyet = 0;
       document.getElementById("sipUrunModal").style.display = "flex";
     }
 
@@ -913,20 +924,45 @@
       document.getElementById("sipUrunModal").style.display = "none";
     }
 
+    function sipUrunM2Hesapla() {
+      var olcu = document.getElementById("sipUrunOlcu").value.trim();
+      var adet = parseInt(document.getElementById("sipUrunAdet").value) || 1;
+      var olcuParts = olcu.replace(/\s/g, "").replace(",", ".").split("x");
+      if (olcuParts.length !== 2) return { m2: 0, totalM2: 0, en: 0, boy: 0 };
+      var en = parseFloat(olcuParts[0]);
+      var boy = parseFloat(olcuParts[1]);
+      if (!(en > 0) || !(boy > 0)) return { m2: 0, totalM2: 0, en: 0, boy: 0 };
+      return { m2: en * boy, totalM2: en * boy * adet, en: en, boy: boy };
+    }
+
+    function sipUrunTutarHesapla() {
+      var info = sipUrunM2Hesapla();
+      var tip = document.getElementById("sipUrunTip").value;
+      var bilgi = document.getElementById("sipUrunBilgi");
+      if (sipUrunModelMaliyet === 0 || info.totalM2 === 0) {
+        document.getElementById("sipUrunTutar").value = "";
+        bilgi.style.display = "none";
+        return;
+      }
+      // Aynı kural: fiyat hesaplama ekranındaki gibi maliyet × 2 × 1.10, oval/yuvarlak +₺45/m²
+      var m2Satis = sipUrunModelMaliyet * 2 * 1.10;
+      if (tip === "Oval" || tip === "Yuvarlak") m2Satis += 45;
+      var tutar = info.totalM2 * m2Satis;
+      document.getElementById("sipUrunTutar").value = tutar.toFixed(2);
+      bilgi.style.display = "block";
+      bilgi.innerHTML = "📐 " + info.totalM2.toFixed(2) + " m² × " + formatTL(m2Satis) + " = " + formatTL(tutar);
+    }
+
     function sipUrunEkleKaydet() {
       var model = document.getElementById("sipUrunModel").value.trim();
+      if (!model) return alert("Model giriniz!");
+      if (sipUrunModelMaliyet === 0) return alert("Lütfen listeden bir model seçiniz (m² fiyatı için).");
+      var info = sipUrunM2Hesapla();
+      if (info.totalM2 === 0) return alert("Geçerli bir ölçü giriniz (örn: 3x4.5).");
       var olcu = document.getElementById("sipUrunOlcu").value.trim();
       var adet = parseInt(document.getElementById("sipUrunAdet").value) || 1;
       var tutar = parseFloat(document.getElementById("sipUrunTutar").value) || 0;
-      if (!model) return alert("Model giriniz!");
-      if (!tutar) return alert("Tutar giriniz!");
-      var m2 = 0;
-      var olcuParts = olcu.replace(/\s/g, "").replace(",", ".").split("x");
-      if (olcuParts.length === 2) {
-        var en = parseFloat(olcuParts[0]);
-        var boy = parseFloat(olcuParts[1]);
-        if (en > 0 && boy > 0) m2 = en * boy * adet;
-      }
+      var m2 = info.totalM2;
       sipUrunler.push({
         id: Date.now(),
         model: model,
