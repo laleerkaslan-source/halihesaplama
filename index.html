@@ -340,7 +340,28 @@
           </div>
           <div style="margin-top: 8px; padding: 10px 14px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; display: flex; justify-content: space-between;">
             <span style="color:#94a3b8;">Ürünler Toplamı</span>
-            <span id="sipUrunlerToplam" style="color:#22c55e; font-weight: 800;">₺0,00</span>
+            <span id="sipUrunlerToplam" style="color:#f1f5f9; font-weight: 700;">₺0,00</span>
+          </div>
+
+          <!-- İNDİRİM -->
+          <div style="margin-top: 10px; padding: 12px 14px; background: #1a2e0d; border: 1px solid #84cc16; border-radius: 8px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+              <span style="color:#bef264; font-weight: 700; font-size: 13px;">🏷️ İndirim</span>
+              <div style="display:flex; gap:6px; align-items:center;">
+                <button id="indBtnTL" class="btn btn-sm" onclick="indirimTipDegistir('tutar')" style="background:#84cc16; color:#0a0f1e; font-weight:700;">₺ Tutar</button>
+                <button id="indBtnPct" class="btn btn-sm" onclick="indirimTipDegistir('yuzde')" style="background:#1e293b; color:#94a3b8;">% Oran</button>
+                <input class="input" type="number" step="0.01" id="indirimDeger" placeholder="0" oninput="indirimGuncelle()" style="width:120px; padding:6px 10px;" />
+                <button class="btn btn-sm btn-ghost" onclick="indirimSifirla()" title="İndirimi sıfırla">✕</button>
+              </div>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-top:8px; padding-top:8px; border-top:1px dashed #4d7c0f;">
+              <span style="color:#94a3b8; font-size:12px;">Uygulanan İndirim</span>
+              <span id="indirimTutar" style="color:#bef264; font-weight: 700;">₺0,00</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-top:6px; padding-top:6px; border-top:1px solid #84cc16;">
+              <span style="color:#f1f5f9; font-weight: 700;">Net Toplam</span>
+              <span id="sipNetToplam" style="color:#22c55e; font-weight: 800; font-size: 15px;">₺0,00</span>
+            </div>
           </div>
         </div>
 
@@ -867,7 +888,8 @@
       });
       sepet = [];
       sepetGoster();
-      // Bölünmüş ödeme defaultu: tek satır, toplam tutar nakit
+      // İndirim sıfırla, default ödeme = ürünler toplamı
+      document.getElementById("indirimDeger").value = "";
       var toplam = sipUrunler.reduce(function(a, x) { return a + x.tutar; }, 0);
       sipOdemeler = [{ method: "nakit", amount: toplam }];
       switchTab(2);
@@ -974,9 +996,10 @@
         taksit: 0
       });
       sipUrunleriGoster();
-      // Ödeme toplamını otomatik güncelle (tek satır varsa)
+      // Ödeme toplamını otomatik güncelle (tek satır varsa) — net tutara göre
       if (sipOdemeler.length === 1) {
-        sipOdemeler[0].amount = sipUrunler.reduce(function(a, x) { return a + x.tutar; }, 0);
+        var net = sipUrunler.reduce(function(a, x) { return a + x.tutar; }, 0) - indirimHesapla();
+        sipOdemeler[0].amount = net;
         sipOdemeleriGoster();
       } else {
         sipOdemeOzetGuncelle();
@@ -1071,25 +1094,69 @@
       sipOdemeOzetGuncelle();
     }
 
+    // ═══════════ İNDİRİM ═══════════
+    var indirimTip = "tutar"; // "tutar" veya "yuzde"
+
+    function indirimTipDegistir(tip) {
+      indirimTip = tip;
+      var btnTL = document.getElementById("indBtnTL");
+      var btnPct = document.getElementById("indBtnPct");
+      if (tip === "tutar") {
+        btnTL.style.background = "#84cc16"; btnTL.style.color = "#0a0f1e";
+        btnPct.style.background = "#1e293b"; btnPct.style.color = "#94a3b8";
+      } else {
+        btnPct.style.background = "#84cc16"; btnPct.style.color = "#0a0f1e";
+        btnTL.style.background = "#1e293b"; btnTL.style.color = "#94a3b8";
+      }
+      indirimGuncelle();
+    }
+
+    function indirimSifirla() {
+      document.getElementById("indirimDeger").value = "";
+      indirimGuncelle();
+    }
+
+    function indirimHesapla() {
+      var urunlerToplam = sipUrunler.reduce(function(a, x) { return a + x.tutar; }, 0);
+      var deger = parseFloat(document.getElementById("indirimDeger").value) || 0;
+      if (deger <= 0) return 0;
+      if (indirimTip === "yuzde") {
+        if (deger > 100) deger = 100;
+        return +(urunlerToplam * deger / 100).toFixed(2);
+      }
+      if (deger > urunlerToplam) deger = urunlerToplam;
+      return +deger.toFixed(2);
+    }
+
+    function indirimGuncelle() {
+      var ind = indirimHesapla();
+      document.getElementById("indirimTutar").textContent = formatTL(ind);
+      sipOdemeOzetGuncelle();
+    }
+
     function sipOdemeOzetGuncelle() {
       var urunlerToplam = sipUrunler.reduce(function(a, x) { return a + x.tutar; }, 0);
+      var indirim = indirimHesapla();
+      var netToplam = urunlerToplam - indirim;
       var odemeToplam = sipOdemeler.reduce(function(a, x) { return a + (parseFloat(x.amount) || 0); }, 0);
-      var fark = urunlerToplam - odemeToplam;
+      var fark = netToplam - odemeToplam;
       // Kapora: nakit/havale ödemelerin toplamı (peşin alındı kabul edilir)
       var kapora = sipOdemeler.reduce(function(a, x) {
         return a + ((x.method === "nakit" || x.method === "havale") ? (parseFloat(x.amount) || 0) : 0);
       }, 0);
+      var netToplamEl = document.getElementById("sipNetToplam");
+      if (netToplamEl) netToplamEl.textContent = formatTL(netToplam);
       document.getElementById("sipOdemeToplam").textContent = formatTL(odemeToplam);
       var farkEl = document.getElementById("sipOdemeFark");
-      if (Math.abs(fark) < 0.01 && urunlerToplam > 0) {
+      if (Math.abs(fark) < 0.01 && netToplam > 0) {
         farkEl.innerHTML = '<span style="color:#22c55e;">✓ Eşit</span>';
-      } else if (urunlerToplam > 0) {
+      } else if (netToplam > 0) {
         farkEl.innerHTML = '<span style="color:#ef4444;">Fark: ' + formatTL(Math.abs(fark)) + '</span>';
       } else {
         farkEl.innerHTML = '';
       }
       document.getElementById("sipKaporaOzet").textContent = formatTL(kapora);
-      document.getElementById("sipKalanOzet").textContent = formatTL(urunlerToplam - kapora);
+      document.getElementById("sipKalanOzet").textContent = formatTL(netToplam - kapora);
     }
 
     function sipKaydet() {
@@ -1098,11 +1165,13 @@
       if (sipUrunler.length === 0) return alert("En az bir ürün ekleyiniz!");
 
       var urunlerToplam = sipUrunler.reduce(function(a, x) { return a + x.tutar; }, 0);
+      var indirim = indirimHesapla();
+      var netToplam = urunlerToplam - indirim;
       var odemeler = sipOdemeler.filter(function(x) { return (parseFloat(x.amount) || 0) > 0; });
       if (odemeler.length === 0) return alert("Ödeme tutarı giriniz!");
       var odemeToplam = odemeler.reduce(function(a, x) { return a + (parseFloat(x.amount) || 0); }, 0);
-      if (Math.abs(urunlerToplam - odemeToplam) >= 0.01) {
-        return alert("Ödeme toplamı (" + formatTL(odemeToplam) + ") sipariş tutarına (" + formatTL(urunlerToplam) + ") eşit olmalı!");
+      if (Math.abs(netToplam - odemeToplam) >= 0.01) {
+        return alert("Ödeme toplamı (" + formatTL(odemeToplam) + ") net tutara (" + formatTL(netToplam) + ") eşit olmalı!");
       }
 
       var kapora = odemeler.reduce(function(a, x) {
@@ -1118,9 +1187,10 @@
         model: sipUrunler.map(function(u) { return u.model; }).join(" + "),
         olcu: ilk.olcu || "",
         m2: sipUrunler.reduce(function(a, x) { return a + (x.m2 || 0); }, 0),
-        fiyat: urunlerToplam,
+        fiyat: netToplam,
+        indirim: indirim,
         kapora: kapora,
-        kalan: urunlerToplam - kapora,
+        kalan: netToplam - kapora,
         tarih: document.getElementById("sipTarih").value || todayStr(),
         teslim_tarih: document.getElementById("sipTeslimTarih").value || null,
         durum: document.getElementById("sipDurum").value,
@@ -1141,6 +1211,7 @@
         sipListele();
         sipUrunler = [];
         sipOdemeler = [{ method: "nakit", amount: 0 }];
+        document.getElementById("indirimDeger").value = "";
         sipUrunleriGoster();
         sipOdemeleriGoster();
         ["sipMusteri","sipTelefon","sipNot"].forEach(function(id) {
@@ -1204,6 +1275,9 @@
           }).join("");
         } else {
           urunlerHtml = '<div style="font-size:13px;">' + (s.model || "-") + (s.olcu ? ' <span style="color:#94a3b8;">' + s.olcu + '</span>' : '') + '</div>';
+        }
+        if (s.indirim && s.indirim > 0) {
+          urunlerHtml += '<div style="font-size:11px; color:#bef264; margin-top:2px;">🏷️ İndirim: −' + formatTL(s.indirim) + '</div>';
         }
 
         var odemeHtml;
