@@ -1291,9 +1291,15 @@
           odemeHtml = '<span style="color:#94a3b8; font-size:12px;">—</span>';
         }
 
+        var notText = s.not_text || s.note || "";
+        var notEsc = notText.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+        var musteriCell = '<div style="font-weight:600;color:#f1f5f9;">' + s.musteri + '</div>';
+        if (notEsc) {
+          musteriCell += '<div style="color:#94a3b8;font-size:11px;margin-top:2px;font-style:italic;">📝 ' + notEsc + '</div>';
+        }
         html += '<tr>'
           + '<td>' + (s.tarih || "-") + '</td>'
-          + '<td style="font-weight:600;color:#f1f5f9;">' + s.musteri + '</td>'
+          + '<td>' + musteriCell + '</td>'
           + '<td>' + (s.telefon || "-") + '</td>'
           + '<td>' + urunlerHtml + '</td>'
           + '<td style="color:#22c55e;font-weight:700;">' + formatTL(s.fiyat) + '</td>'
